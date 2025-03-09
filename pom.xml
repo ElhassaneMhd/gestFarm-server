@@ -11,7 +11,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>GestFarm</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Gestfarm</name>
+	<name>GestFarm</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
