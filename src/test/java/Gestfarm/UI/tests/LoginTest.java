@@ -1,5 +1,6 @@
 package Gestfarm.UI.tests;
 
+import Gestfarm.UI.AppNavigation;
 import Gestfarm.UI.BaseSeleniumTest;
 import Gestfarm.UI.pages.LoginPage;
 import Gestfarm.UI.utils.SeleniumUtils;
@@ -20,11 +21,33 @@ public class LoginTest extends BaseSeleniumTest {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
         
-        // Use test credentials - Replace with valid test credentials for your app
-        loginPage.login("testuser", "password123");
+        // Use the actual admin credentials provided
+        loginPage.login("admin@gmail.com", "password123");
         
         // Verify login was successful
         assertTrue(loginPage.isLoginSuccessful(), "Login should be successful with valid credentials");
+        
+        // Verify we're redirected to the root URL
+        assertEquals("http://localhost:5173/", driver.getCurrentUrl(), 
+                    "After login, user should be redirected to the root URL");
+    }
+    
+    @Test
+    @DisplayName("Test navigation to dashboard")
+    public void testNavigationToDashboard() {
+        // First login
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.navigateTo();
+        loginPage.login("admin@gmail.com", "password123");
+        assertTrue(loginPage.isLoginSuccessful(), "Login should be successful");
+        
+        // Then navigate to dashboard
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToDashboardFromRoot();
+        
+        // Verify we're on the sheep page (default dashboard)
+        assertTrue(driver.getCurrentUrl().contains("/app/sheep"), 
+                  "After clicking on dashboard, user should be redirected to the sheep page");
     }
 
     @Test

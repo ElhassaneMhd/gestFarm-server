@@ -1,5 +1,6 @@
 package Gestfarm.UI.tests;
 
+import Gestfarm.UI.AppNavigation;
 import Gestfarm.UI.BaseSeleniumTest;
 import Gestfarm.UI.pages.LoginPage;
 import Gestfarm.UI.pages.SheepPage;
@@ -23,11 +24,15 @@ public class SheepManagementTest extends BaseSeleniumTest {
         // Login before each test
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
-        loginPage.login("testuser", "password123"); // Use valid test credentials
+        loginPage.login("admin@gmail.com", "password123"); // Using admin credentials
         
-        // Navigate to sheep page
+        // Navigate from root to dashboard
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToDashboardFromRoot();
+        
+        // Initialize the sheep page
         sheepPage = new SheepPage(driver);
-        sheepPage.navigateTo();
+        // No need to navigate again as we're already on the sheep page after dashboard navigation
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses({
     LoginTest.class,
+    NavigationTest.class,
     SheepManagementTest.class,
     CategoryManagementTest.class,
     SaleManagementTest.class,

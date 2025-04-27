@@ -1,5 +1,6 @@
 package Gestfarm.UI.tests;
 
+import Gestfarm.UI.AppNavigation;
 import Gestfarm.UI.BaseSeleniumTest;
 import Gestfarm.UI.pages.CategoriesPage;
 import Gestfarm.UI.pages.LoginPage;
@@ -23,11 +24,15 @@ public class CategoryManagementTest extends BaseSeleniumTest {
         // Login before each test
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
-        loginPage.login("testuser", "password123"); // Use valid test credentials
+        loginPage.login("admin@gmail.com", "password123"); // Using admin credentials
         
-        // Navigate to categories page
+        // Navigate from root to dashboard and then categories
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToDashboardFromRoot();
+        navigation.goToCategoriesPage();
+        
+        // Initialize the categories page
         categoriesPage = new CategoriesPage(driver);
-        categoriesPage.navigateTo();
     }
 
     @Test

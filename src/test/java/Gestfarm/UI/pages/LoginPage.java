@@ -48,10 +48,12 @@ public class LoginPage {
      * Check if login was successful
      */
     public boolean isLoginSuccessful() {
-        // Check if redirected to dashboard or home page
-        // This depends on your app's behavior after login
+        // According to the app flow, successful login redirects to root URL "/"
         try {
-            wait.until(ExpectedConditions.urlContains("dashboard")); // or any URL that indicates successful login
+            // Wait for redirect to happen and URL to change to either / or /app
+            wait.until(driver -> 
+                driver.getCurrentUrl().equals("http://localhost:5173/") || 
+                driver.getCurrentUrl().startsWith("http://localhost:5173/app"));
             return true;
         } catch (Exception e) {
             return false;
