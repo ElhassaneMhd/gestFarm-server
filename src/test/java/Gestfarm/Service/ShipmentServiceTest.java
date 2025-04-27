@@ -10,7 +10,11 @@ import Gestfarm.Repository.ShipmentRepository;
 import Gestfarm.Repository.UserRepository;
 import Gestfarm.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +33,8 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(OrderAnnotation.class)
+@DisplayName("Shipment Service Tests")
 public class ShipmentServiceTest {
 
     @Mock
@@ -59,12 +65,16 @@ public class ShipmentServiceTest {
     }
 
     @Test
+    @Order(1)
+    @DisplayName("Find All Shipments - Should Return Shipment List")
     void whenFindAll_thenReturnShipmentList() {
         when(shipmentRepository.findAll()).thenReturn(Arrays.asList(testShipment));
         assertNotNull(shipmentService.findAll());
     }
 
     @Test
+    @Order(2)
+    @DisplayName("Paginate Shipments - Should Return Paged Results")
     void whenPaginate_thenReturnPagedShipments() {
         Page<Shipment> page = new PageImpl<>(Arrays.asList(testShipment));
         when(shipmentRepository.findAll(any(Pageable.class))).thenReturn(page);
@@ -75,6 +85,8 @@ public class ShipmentServiceTest {
     }
 
     @Test
+    @Order(3)
+    @DisplayName("Save Shipment - With Valid Data Should Return Shipment")
     void whenSaveShipment_withValidData_thenReturnShipment() {
         when(shipmentRepository.save(any(Shipment.class))).thenReturn(testShipment);
         when(userService.findById(any())).thenReturn(TestUtils.createTestUser());
@@ -86,6 +98,8 @@ public class ShipmentServiceTest {
     }
 
     @Test
+    @Order(4)
+    @DisplayName("Update Shipment - With Valid Data Should Return Updated Shipment")
     void whenUpdateShipment_withValidData_thenReturnUpdatedShipment() {
         User testUser = TestUtils.createTestUser();
         testUser.setShipments(new ArrayList<>());
@@ -100,6 +114,8 @@ public class ShipmentServiceTest {
     }
 
     @Test
+    @Order(5)
+    @DisplayName("Delete Shipment - With Valid Id Should Return Success")
     void whenDeleteShipment_withValidId_thenReturnSuccess() {
         User testUser = TestUtils.createTestUser();
         testUser.setShipments(new ArrayList<>());

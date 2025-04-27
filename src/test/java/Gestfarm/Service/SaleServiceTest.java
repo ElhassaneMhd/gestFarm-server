@@ -8,7 +8,11 @@ import Gestfarm.Repository.SaleRepository;
 import Gestfarm.Repository.SheepRepository;
 import Gestfarm.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,6 +31,8 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(OrderAnnotation.class)
+@DisplayName("Sale Service Tests")
 public class SaleServiceTest {
 
     @Mock
@@ -56,12 +62,16 @@ public class SaleServiceTest {
     }
 
     @Test
+    @Order(1)
+    @DisplayName("Find All Sales - Should Return Sale List")
     void whenFindAll_thenReturnSaleList() {
         when(saleRepository.findAll()).thenReturn(Arrays.asList(testSale));
         assertNotNull(saleService.findAll());
     }
 
     @Test
+    @Order(2)
+    @DisplayName("Paginate Sales - Should Return Paged Results")
     void whenPaginate_thenReturnPagedSales() {
         Page<Sale> page = new PageImpl<>(Arrays.asList(testSale));
         when(saleRepository.findAll(any(Pageable.class))).thenReturn(page);
@@ -72,6 +82,8 @@ public class SaleServiceTest {
     }
 
     @Test
+    @Order(3)
+    @DisplayName("Save Sale - With Valid Data Should Return Sale")
     void whenSaveSale_withValidData_thenReturnSale() {
         // Mock sheep service to return test sheep
         when(sheepService.find(any(Integer.class))).thenReturn(testSheep);
@@ -92,6 +104,8 @@ public class SaleServiceTest {
     }
 
     @Test
+    @Order(4)
+    @DisplayName("Update Sale - With Valid Data Should Return Updated Sale")
     void whenUpdateSale_withValidData_thenReturnUpdatedSale() {
         testSale.setSheep(new ArrayList<>());
         testSale.getSheep().add(testSheep);
@@ -104,6 +118,8 @@ public class SaleServiceTest {
     }
 
     @Test
+    @Order(5)
+    @DisplayName("Delete Sale - With Valid Id Should Return Success")
     void whenDeleteSale_withValidId_thenReturnSuccess() {
         when(saleRepository.findById(1)).thenReturn(Optional.of(testSale));
         

@@ -9,7 +9,11 @@ import Gestfarm.Repository.UserRepository;
 import Gestfarm.Security.JWTService;
 import Gestfarm.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,6 +30,8 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(OrderAnnotation.class)
+@DisplayName("User Service Tests")
 public class UserServiceTest {
 
     @Mock
@@ -56,6 +62,8 @@ public class UserServiceTest {
     }
 
     @Test
+    @Order(1)
+    @DisplayName("Find All Users - Should Return User List")
     void whenFindAll_thenReturnUserList() {
         when(roleRepository.findByName("ROLE_ADMIN")).thenReturn(new Role());
         when(userRepository.findUsersByRoleNot(any())).thenReturn(Arrays.asList(testUser));
@@ -64,6 +72,8 @@ public class UserServiceTest {
     }
 
     @Test
+    @Order(2)
+    @DisplayName("Save User - With Valid Data Should Return User")
     void whenSaveUser_withValidData_thenReturnUser() {
         when(userRepository.existsByUsername(any())).thenReturn(false);
         when(userRepository.existsByEmail(any())).thenReturn(false);
@@ -77,6 +87,8 @@ public class UserServiceTest {
     }
 
     @Test
+    @Order(3)
+    @DisplayName("Delete User - With Valid Id Should Return Success")
     void whenDeleteUser_withValidId_thenReturnSuccess() {
         // Create a user with empty shipments list to avoid NPE
         User user = TestUtils.createTestUser();
