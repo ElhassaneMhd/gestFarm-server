@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -123,8 +124,33 @@ public class LoginTest extends BaseSeleniumTest {
         assertTrue(driver.getCurrentUrl().contains("login"), 
                   "Should remain on login page when submitting empty credentials");
 
-        // Verify login button is disabled
-        WebElement loginButton = driver.findElement(By.xpath("//button[text()='Login']"));
-        assertFalse(loginButton.isEnabled(), "Login button should be disabled when fields are empty");
+        // Wait for the login button to be present
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement loginButton = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.xpath("//button[@type='button' and contains(@class, 'cursor-not-allowed') and @disabled]")));
+
+        // Verify the login button is disabled
+        assertNotNull(loginButton, "Login button should be disabled when fields are empty");
+
+        // Verify no error labels are displayed when both inputs are empty
+        List<WebElement> errorLabels = driver.findElements(By.cssSelector("span.text-red-500.scale-100"));
+        assertTrue(errorLabels.isEmpty(), "No error labels should be displayed when both inputs are empty");
+
+        // Fill the email field and leave the password field empty
+        WebElement emailInput = driver.findElement(By.cssSelector("input[type='email']"));
+        emailInput.sendKeys("admin@gmail.com");
+
+        // Verify the error label appears for the password field
+        WebElement passwordLabel = driver.findElement(By.xpath("//label[text()='Password ']/following-sibling::span[contains(@class, 'text-red-500') and contains(@class, 'scale-100')]"));
+        assertNotNull(passwordLabel, "Password label should indicate an error when the field is empty");
+
+        // Clear the email field and fill the password field
+        emailInput.clear();
+        WebElement passwordInput = driver.findElement(By.cssSelector("input[type='password']"));
+        passwordInput.sendKeys("password123");
+
+        // Verify the error label appears for the email field
+        WebElement emailLabel = driver.findElement(By.xpath("//label[text()='Email Address']/following-sibling::span[contains(@class, 'text-red-500') and contains(@class, 'scale-100')]"));
+        assertNotNull(emailLabel, "Email label should indicate an error when the field is empty");
     }
 }
