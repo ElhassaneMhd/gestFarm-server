@@ -17,7 +17,7 @@ import java.time.Duration;
 public abstract class BaseSeleniumTest {
 
     protected static WebDriver driver;
-    protected static final String BASE_URL = "http://localhost:5173/app"; // Updated to point to the app path
+    protected static final String BASE_URL = "http://localhost:5173/"; // Updated to point to the app path
 
     @BeforeAll
     public static void setupClass() {

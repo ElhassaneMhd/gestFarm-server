@@ -1,128 +1,130 @@
 package Gestfarm.UI.tests;
 
-import Gestfarm.UI.AppNavigation;
 import Gestfarm.UI.BaseSeleniumTest;
 import Gestfarm.UI.pages.LoginPage;
-import Gestfarm.UI.utils.SeleniumUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for login functionality
  */
-public class LoginTest extends BaseSeleniumTest {
+public class LoginTest extends BaseSeleniumTest {  
+    @Test
+    @DisplayName("Test admin login and redirection")
+    public void testAdminLogin() {
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.navigateTo();
+        loginPage.login("admin@gmail.com", "password123");
+        assertTrue(loginPage.isLoginSuccessful(), "Admin login should be successful");
+        assertEquals("http://localhost:5173/app/sheep", driver.getCurrentUrl(), 
+                     "Admin should be redirected to the sheep dashboard");
+    }
 
     @Test
-    @DisplayName("Test successful login with valid credentials")
-    public void testSuccessfulLogin() {
+    @DisplayName("Test user login and redirection")
+    public void testUserLogin() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
-        
-        // Use the actual admin credentials provided
-        loginPage.login("admin@gmail.com", "password123");
-        
-        // Verify login was successful
-        assertTrue(loginPage.isLoginSuccessful(), "Login should be successful with valid credentials");
-        
-        // Verify we're redirected to the root URL
+        loginPage.login("user@gmail.com", "password123");
+        assertTrue(loginPage.isLoginSuccessful(), "User login should be successful");
         assertEquals("http://localhost:5173/", driver.getCurrentUrl(), 
-                    "After login, user should be redirected to the root URL");
+                     "User should be redirected to the home page");
     }
-    
+
     @Test
-    @DisplayName("Test navigation to dashboard")
-    public void testNavigationToDashboard() {
-        // First login
+    @DisplayName("Test farmer login and redirection")
+    public void testFarmerLogin() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
-        loginPage.login("admin@gmail.com", "password123");
-        assertTrue(loginPage.isLoginSuccessful(), "Login should be successful");
-        
-        // Then navigate to dashboard
-        AppNavigation navigation = new AppNavigation(driver);
-        navigation.goToDashboardFromRoot();
-        
-        // Verify we're on the sheep page (default dashboard)
-        assertTrue(driver.getCurrentUrl().contains("/app/sheep"), 
-                  "After clicking on dashboard, user should be redirected to the sheep page");
+        loginPage.login("farmer@gmail.com", "password123");
+        assertTrue(loginPage.isLoginSuccessful(), "Farmer login should be successful");
+        assertEquals("http://localhost:5173/app/sheep", driver.getCurrentUrl(), 
+                     "Farmer should be redirected to the sheep dashboard");
+    }
+
+    @Test
+    @DisplayName("Test shipper login and redirection")
+    public void testShipperLogin() {
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.navigateTo();
+        loginPage.login("shipper@gmail.com", "password123");
+        assertTrue(loginPage.isLoginSuccessful(), "Shipper login should be successful");
+        assertEquals("http://localhost:5173/app/shipments", driver.getCurrentUrl(), 
+                     "Shipper should be redirected to the shipments dashboard");
     }
 
     @Test
     @DisplayName("Test unsuccessful login with invalid credentials")
-    public void testFailedLogin() {
+    public void testInvalidCredentials() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
-        
+
         // Use invalid credentials
-        loginPage.login("wronguser", "wrongpassword");
-        
+        loginPage.login("wronguser@gmail.com", "wrongpassword");
+
         // Verify login failed
         assertFalse(loginPage.isLoginSuccessful(), "Login should fail with invalid credentials");
-        
+
+        // Wait for the error message to appear
+        WebDriverWait errorWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement errorMessageElement = errorWait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector(".error-message"))); // Update the selector if necessary
+
         // Verify error message is displayed
-        String errorMsg = loginPage.getErrorMessage();
+        String errorMsg = errorMessageElement.getText();
         assertNotNull(errorMsg, "Error message should be displayed");
         assertTrue(errorMsg.toLowerCase().contains("invalid") || 
                    errorMsg.toLowerCase().contains("incorrect") || 
                    errorMsg.toLowerCase().contains("failed"),
                   "Error message should indicate invalid credentials");
+
+        // Wait for the toast error message to appear
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement toast = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("section[aria-label='Notifications alt+T'] ol li[data-type='error'] div[data-title]")));
+
+        // Add a short delay to ensure the toast is fully rendered
+        try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        // Capture the toast message text immediately
+        String toastMessage = toast.getText();
+
+        // Verify toast error message is displayed
+        assertNotNull(toastMessage, "Toast error message should be displayed");
+        assertEquals("Bad credentials", toastMessage, "Toast should indicate 'Bad credentials'");
     }
 
     @Test
     @DisplayName("Test empty credentials validation")
-    public void testEmptyCredentialsValidation() {
+    public void testEmptyCredentials() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
-        
+
         // Try to login with empty fields
         loginPage.login("", "");
-        
+
         // Check if form validation prevents submission or shows appropriate errors
-        // This will depend on your application's specific behavior
         String errorMsg = loginPage.getErrorMessage();
         assertNotNull(errorMsg, "Error message should be displayed for empty credentials");
-        
+
         // Check we're still on the login page
         assertTrue(driver.getCurrentUrl().contains("login"), 
                   "Should remain on login page when submitting empty credentials");
-    }
 
-    @Test
-    @DisplayName("Test remember me functionality")
-    public void testRememberMe() {
-        // This test assumes your login page has a "Remember Me" checkbox
-        
-        LoginPage loginPage = new LoginPage(driver);
-        loginPage.navigateTo();
-        
-        // Click Remember Me checkbox if it exists
-        try {
-            driver.findElement(By.id("remember-me")).click();
-            
-            // Login with valid credentials
-            loginPage.login("testuser", "password123");
-            
-            // Verify login was successful
-            assertTrue(loginPage.isLoginSuccessful(), "Login should be successful");
-            
-            // Close browser and reopen to test cookie persistence
-            // Note: In practice, you'd need a more complex approach to test this properly
-            // as simply quitting and remaking the driver isn't the same as closing and reopening a browser.
-            driver.quit();
-            setupTest(); // This recreates the driver
-            
-            driver.get(BASE_URL);
-            
-            // Check if we're automatically logged in
-            // (this is a simplistic check; actual implementation will depend on your application)
-            boolean isLoggedIn = !driver.getCurrentUrl().contains("login");
-            assertTrue(isLoggedIn, "User should remain logged in when Remember Me is checked");
-        } catch (Exception e) {
-            // If Remember Me checkbox doesn't exist, skip the test
-            System.out.println("Remember Me functionality not found or test needs adjustment");
-        }
+        // Verify login button is disabled
+        WebElement loginButton = driver.findElement(By.xpath("//button[text()='Login']"));
+        assertFalse(loginButton.isEnabled(), "Login button should be disabled when fields are empty");
     }
 }

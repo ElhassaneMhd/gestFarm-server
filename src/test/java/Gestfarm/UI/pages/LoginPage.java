@@ -16,10 +16,10 @@ public class LoginPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
-    // Locators for elements on the login page - updated based on actual implementation
-    private final By usernameInput = By.name("username"); 
-    private final By passwordInput = By.name("password");
-    private final By loginButton = By.xpath("//button[contains(text(), 'Log in') or contains(text(), 'Login')]");
+    // Updated locators to match the inspected HTML structure
+    private final By usernameInput = By.xpath("//input[@type='email' and @placeholder='Email Address']");
+    private final By passwordInput = By.xpath("//input[@type='password' and @placeholder='Password ']");
+    private final By loginButton = By.xpath("//button[text()='Login']");
     private final By errorMessage = By.className("error-message"); // Adjust if error message has specific class
 
     public LoginPage(WebDriver driver) {
@@ -38,10 +38,24 @@ public class LoginPage {
      * Perform login with the specified credentials
      */
     public void login(String username, String password) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(usernameInput));
-        driver.findElement(usernameInput).sendKeys(username);
-        driver.findElement(passwordInput).sendKeys(password);
-        driver.findElement(loginButton).click();
+        // Wait for the form container to be visible
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("form")));
+
+        // Wait for the username input to be visible and click to focus
+        WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(usernameInput));
+        usernameField.click();
+        usernameField.clear();
+        usernameField.sendKeys(username);
+
+        // Wait for the password input to be visible and click to focus
+        WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput));
+        passwordField.click();
+        passwordField.clear();
+        passwordField.sendKeys(password);
+
+        // Click the login button
+        WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(loginButton));
+        loginBtn.click();
     }
 
     /**
