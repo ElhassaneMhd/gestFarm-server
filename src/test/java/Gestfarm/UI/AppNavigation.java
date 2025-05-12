@@ -17,7 +17,6 @@ public class AppNavigation {
 
     // Sidebar menu item locators
     // Updated locator for profile icon to match the actual HTML structure
-    private final By dashboardOption = By.xpath("//div[contains(@class, 'dropdown')]//a[contains(text(), 'Dashboard')]");
     private final By sidebarSheepLink = By.xpath("//a[contains(@href, '/app/sheep') or contains(., 'Sheep')]");
     private final By sidebarCategoriesLink = By.xpath("//a[contains(@href, '/app/categories') or contains(., 'Categories')]");
     private final By sidebarSalesLink = By.xpath("//a[contains(@href, '/app/sales') or contains(., 'Sales')]");
@@ -32,21 +31,10 @@ public class AppNavigation {
 
     /**
      * Navigate from root to dashboard
+     * Updated to skip navigation as admin login already lands on the sheep page
      */
     public void goToDashboardFromRoot() {
-        // Ensure the profile icon is visible and clickable
-        By profileIcon = By.xpath("//svg[contains(@class, 'lucide-user-round')]");
-        wait.until(ExpectedConditions.presenceOfElementLocated(profileIcon));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(profileIcon));
-        wait.until(ExpectedConditions.elementToBeClickable(profileIcon)).click();
-
-        // Ensure the dashboard option is visible and clickable
-        wait.until(ExpectedConditions.presenceOfElementLocated(dashboardOption));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(dashboardOption));
-        wait.until(ExpectedConditions.elementToBeClickable(dashboardOption)).click();
-
-        // Wait for redirect to the sheep page (default dashboard)
-        wait.until(ExpectedConditions.urlContains("/app/sheep"));
+        // No navigation needed as admin login lands directly on the sheep page
     }
 
     /**
