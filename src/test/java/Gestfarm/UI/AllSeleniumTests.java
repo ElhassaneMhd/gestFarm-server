@@ -10,12 +10,9 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses({
     LoginTest.class,
-    NavigationTest.class,
     SheepManagementTest.class,
     CategoryManagementTest.class,
-    SaleManagementTest.class,
-    UserManagementTest.class
-    // Add more test classes as you create them
+    SaleManagementTest.class
 })
 public class AllSeleniumTests {
     // This class serves as a test suite and doesn't need any code

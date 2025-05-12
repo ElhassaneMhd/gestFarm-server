@@ -51,7 +51,7 @@ public class SaleManagementTest extends BaseSeleniumTest {
         // Add a new sheep if needed
         if (sheepPage.getSheepCount() == 0) {
             sheepPage.clickAddSheep();
-            sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3);
+            sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3, 0, 0, uniqueSheepName, uniqueSheepName);
             sheepPage.submitSheepForm();
         } else {
             // Get the name of an existing sheep (this might not work if we can't easily get the sheep name)
@@ -106,7 +106,7 @@ public class SaleManagementTest extends BaseSeleniumTest {
             // Add a new sheep if needed
             if (sheepPage.getSheepCount() == 0) {
                 sheepPage.clickAddSheep();
-                sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3);
+                sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3, 0, 0, uniqueSheepName, uniqueSheepName);
                 sheepPage.submitSheepForm();
             } else {
                 uniqueSheepName = "Existing Sheep"; // Replace with a method to get existing sheep name if possible
@@ -154,7 +154,7 @@ public class SaleManagementTest extends BaseSeleniumTest {
             // Add a new sheep if needed
             if (sheepPage.getSheepCount() == 0) {
                 sheepPage.clickAddSheep();
-                sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3);
+                sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3, 0, 0, uniqueSheepName, uniqueSheepName);
                 sheepPage.submitSheepForm();
             } else {
                 uniqueSheepName = "Existing Sheep"; // Replace with a method to get existing sheep name if possible

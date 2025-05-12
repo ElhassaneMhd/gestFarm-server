@@ -2,7 +2,6 @@ package Gestfarm.UI;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -17,7 +16,7 @@ public class AppNavigation {
     private final WebDriverWait wait;
 
     // Sidebar menu item locators
-    private final By profileIcon = By.xpath("//div[contains(@class, 'avatar') or contains(@class, 'profile')]");
+    // Updated locator for profile icon to match the actual HTML structure
     private final By dashboardOption = By.xpath("//div[contains(@class, 'dropdown')]//a[contains(text(), 'Dashboard')]");
     private final By sidebarSheepLink = By.xpath("//a[contains(@href, '/app/sheep') or contains(., 'Sheep')]");
     private final By sidebarCategoriesLink = By.xpath("//a[contains(@href, '/app/categories') or contains(., 'Categories')]");
@@ -35,12 +34,17 @@ public class AppNavigation {
      * Navigate from root to dashboard
      */
     public void goToDashboardFromRoot() {
-        // Click on profile icon/avatar
+        // Ensure the profile icon is visible and clickable
+        By profileIcon = By.xpath("//svg[contains(@class, 'lucide-user-round')]");
+        wait.until(ExpectedConditions.presenceOfElementLocated(profileIcon));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(profileIcon));
         wait.until(ExpectedConditions.elementToBeClickable(profileIcon)).click();
-        
-        // Click on Dashboard option
+
+        // Ensure the dashboard option is visible and clickable
+        wait.until(ExpectedConditions.presenceOfElementLocated(dashboardOption));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(dashboardOption));
         wait.until(ExpectedConditions.elementToBeClickable(dashboardOption)).click();
-        
+
         // Wait for redirect to the sheep page (default dashboard)
         wait.until(ExpectedConditions.urlContains("/app/sheep"));
     }
@@ -91,5 +95,12 @@ public class AppNavigation {
     public void goToRolesPage() {
         wait.until(ExpectedConditions.elementToBeClickable(sidebarRolesLink)).click();
         wait.until(ExpectedConditions.urlContains("/app/roles"));
+    }
+
+    /**
+     * Example method to explicitly use the driver field
+     */
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
     }
 }

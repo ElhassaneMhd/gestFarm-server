@@ -89,22 +89,12 @@ public class LoginTest extends BaseSeleniumTest {
 
         // Wait for the toast error message to appear
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        WebElement toast = wait.until(ExpectedConditions.presenceOfElementLocated(
+        WebElement toast = wait.until(ExpectedConditions.visibilityOfElementLocated(
             By.cssSelector("section[aria-label='Notifications alt+T'] ol li[data-type='error'] div[data-title]")));
 
-        // Add a short delay to ensure the toast is fully rendered
-        try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-        // Capture the toast message text immediately
-        String toastMessage = toast.getText();
-
         // Verify toast error message is displayed
-        assertNotNull(toastMessage, "Toast error message should be displayed");
-        assertEquals("Bad credentials", toastMessage, "Toast should indicate 'Bad credentials'");
+        assertNotNull(toast, "Toast error message should be displayed");
+        assertEquals("Bad credentials", toast.getText(), "Toast should indicate 'Bad credentials'");
     }
 
     @Test

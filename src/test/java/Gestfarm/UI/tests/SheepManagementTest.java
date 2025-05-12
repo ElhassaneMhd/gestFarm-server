@@ -42,19 +42,23 @@ public class SheepManagementTest extends BaseSeleniumTest {
         String uniqueSheepName = "Test Sheep " + UUID.randomUUID().toString().substring(0, 8);
         String breed = "Merino";
         int age = 2;
-        
+        int number = 1001; // Example number
+        double weight = 45.5; // Example weight in kg
+        String category = "Category A"; // Example category
+        String status = "Listed"; // Example status
+
         // Get initial count of sheep
         int initialCount = sheepPage.getSheepCount();
-        
+
         // Add a new sheep
         sheepPage.clickAddSheep();
-        sheepPage.fillSheepForm(uniqueSheepName, breed, age);
+        sheepPage.fillSheepForm(uniqueSheepName, breed, age, number, weight, category, status);
         sheepPage.submitSheepForm();
-        
+
         // Verify the sheep was added
         int newCount = sheepPage.getSheepCount();
         assertEquals(initialCount + 1, newCount, "Sheep count should increase by 1");
-        
+
         // Verify the added sheep is in the list
         assertTrue(sheepPage.sheepExists(uniqueSheepName), "Added sheep should appear in the list");
     }
@@ -64,17 +68,21 @@ public class SheepManagementTest extends BaseSeleniumTest {
     public void testSearchSheep() {
         // First add a sheep with a unique name
         String uniqueSheepName = "SearchTest " + UUID.randomUUID().toString().substring(0, 8);
-        
+        int number = 1002; // Example number
+        double weight = 50.0; // Example weight in kg
+        String category = "Category B"; // Example category
+        String status = "Available"; // Example status
+
         sheepPage.clickAddSheep();
-        sheepPage.fillSheepForm(uniqueSheepName, "Suffolk", 3);
+        sheepPage.fillSheepForm(uniqueSheepName, "Suffolk", 3, number, weight, category, status);
         sheepPage.submitSheepForm();
-        
+
         // Verify the sheep was added
         assertTrue(sheepPage.sheepExists(uniqueSheepName), "Added sheep should appear in the list");
-        
+
         // Search for the sheep
         sheepPage.searchSheep(uniqueSheepName);
-        
+
         // Verify search results
         assertEquals(1, sheepPage.getSheepCount(), "Search should return exactly one result");
         assertTrue(sheepPage.sheepExists(uniqueSheepName), "Search result should contain the searched sheep");
@@ -85,20 +93,24 @@ public class SheepManagementTest extends BaseSeleniumTest {
     public void testDeleteSheep() {
         // First add a sheep to delete
         String sheepToDelete = "DeleteTest " + UUID.randomUUID().toString().substring(0, 8);
-        
+        int number = 1003; // Example number
+        double weight = 55.0; // Example weight in kg
+        String category = "Category C"; // Example category
+        String status = "Reserved"; // Example status
+
         sheepPage.clickAddSheep();
-        sheepPage.fillSheepForm(sheepToDelete, "Dorper", 1);
+        sheepPage.fillSheepForm(sheepToDelete, "Dorper", 1, number, weight, category, status);
         sheepPage.submitSheepForm();
-        
+
         // Verify the sheep was added
         assertTrue(sheepPage.sheepExists(sheepToDelete), "Added sheep should appear in the list");
-        
+
         // Get initial count
         int initialCount = sheepPage.getSheepCount();
-        
+
         // Delete the sheep
         sheepPage.deleteSheep(sheepToDelete);
-        
+
         // Verify the sheep was deleted
         int newCount = sheepPage.getSheepCount();
         assertEquals(initialCount - 1, newCount, "Sheep count should decrease by 1");

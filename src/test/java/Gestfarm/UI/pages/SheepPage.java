@@ -4,7 +4,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -19,7 +18,6 @@ public class SheepPage {
     private final WebDriverWait wait;
 
     // Locators for elements on the sheep page - updated based on actual React implementation
-    private final By addSheepButton = By.xpath("//button[contains(@class, 'add-button') or contains(text(), 'New')]");
     private final By sheepTable = By.xpath("//table");
     private final By sheepItems = By.xpath("//table//tbody/tr");
     private final By searchInput = By.xpath("//input[@placeholder='Search...']");
@@ -31,7 +29,6 @@ public class SheepPage {
     private final By statusSelector = By.xpath("//p[text()='status']/following-sibling::div");
     private final By ageSelector = By.xpath("//p[text()='age']/following-sibling::div");
     private final By saveButton = By.xpath("//button[contains(text(), 'Save')]");
-    private final By cancelButton = By.xpath("//button[contains(text(), 'Cancel')]");
 
     public SheepPage(WebDriver driver) {
         this.driver = driver;
@@ -49,54 +46,50 @@ public class SheepPage {
      * Click the add sheep button to open the form
      */
     public void clickAddSheep() {
+        // Updated the locator to match the correct button
+        By addSheepButton = By.cssSelector("button.new-record-button");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(addSheepButton));
         wait.until(ExpectedConditions.elementToBeClickable(addSheepButton)).click();
     }
 
     /**
      * Fill the sheep form with the provided details
      */
-    public void fillSheepForm(String name, String breed, int age) {
-        // In GestFarm, sheep are identified by numbers not names
+    public void fillSheepForm(String name, String breed, int age, int number, double weight, String category, String status) {
+        // Fill number
         wait.until(ExpectedConditions.visibilityOfElementLocated(numberInput));
         WebElement numberField = driver.findElement(numberInput);
         numberField.clear();
-        numberField.sendKeys(String.valueOf(name)); // Using name as the number for now
-        
-        // Set weight
+        numberField.sendKeys(String.valueOf(number));
+
+        // Fill weight
         WebElement weightField = driver.findElement(weightInput);
         weightField.clear();
-        weightField.sendKeys(String.valueOf(breed)); // Using breed as weight for now
-        
-        // Select category if needed
+        weightField.sendKeys(String.valueOf(weight));
+
+        // Select category
         try {
             driver.findElement(categorySelector).click();
-            // Select first available category
             wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[contains(@class, 'dropdown')]//div[contains(@class, 'option')][1]"))).click();
+                By.xpath(String.format("//div[contains(@class, 'dropdown')]//div[contains(text(), '%s')]", category)))).click();
         } catch (Exception e) {
             // If selecting category fails, continue
         }
-        
+
         // Select status
         try {
             driver.findElement(statusSelector).click();
-            // Select first status option
             wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[contains(@class, 'dropdown')]//div[contains(@class, 'option')][1]"))).click();
+                By.xpath(String.format("//div[contains(@class, 'dropdown')]//div[contains(text(), '%s')]", status)))).click();
         } catch (Exception e) {
             // If selecting status fails, continue
         }
-        
+
         // Select age
         try {
             driver.findElement(ageSelector).click();
-            // Get age options and select by value from parameter
-            List<WebElement> ageOptions = driver.findElements(
-                By.xpath("//div[contains(@class, 'dropdown')]//div[contains(@class, 'option')]"));
-            if (ageOptions.size() > 0) {
-                int indexToSelect = Math.min(age % ageOptions.size(), ageOptions.size() - 1);
-                ageOptions.get(indexToSelect).click();
-            }
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format("//div[contains(@class, 'dropdown')]//div[contains(text(), '%s')]", age)))).click();
         } catch (Exception e) {
             // If selecting age fails, continue
         }
