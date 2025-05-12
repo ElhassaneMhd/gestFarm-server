@@ -9,6 +9,6 @@ public class PublicCategoryDTO {
     private String name;
     private String description;
     private Integer price ;
-    private String image ;
+    private String image; // Optional field
     private Integer sheep;
 }

@@ -24,6 +24,7 @@ public class Category {
     private Integer id;
     private String name;
     private Integer price;
+    @Column(nullable = true) // Allow null values for the image field
     private String image;
     private String description;
 
