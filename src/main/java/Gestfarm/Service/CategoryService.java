@@ -59,8 +59,9 @@ public class CategoryService {
         category.setName(categoryRequest.name());
         category.setDescription(categoryRequest.description());
         category.setPrice(categoryRequest.price());
-        category.setImage(categoryRequest.image());
-        Category savedCategory =categoryRepository.save(category);
+        if (categoryRequest.image() != null)     category.setImage(categoryRequest.image());
+        
+        Category savedCategory = categoryRepository.save(category);
         return ResponseEntity.ok(savedCategory);
     }
 
