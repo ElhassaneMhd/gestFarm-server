@@ -28,7 +28,6 @@ public class SheepPage {
     private final By categorySelector = By.xpath("//p[text()='Category']/following-sibling::div");
     private final By statusSelector = By.xpath("//p[text()='status']/following-sibling::div");
     private final By ageSelector = By.xpath("//p[text()='age']/following-sibling::div");
-    private final By saveButton = By.xpath("//button[contains(text(), 'Save')]");
 
     public SheepPage(WebDriver driver) {
         this.driver = driver;
@@ -67,7 +66,7 @@ public class SheepPage {
         By weightInput = By.xpath("//input[@placeholder='Weight (kg)']");
         WebElement weightField = driver.findElement(weightInput);
         weightField.clear();
-        weightField.sendKeys(String.valueOf(weight));
+        weightField.sendKeys(String.valueOf((int) weight)); // Cast weight to int to avoid decimal values
 
         // Select category
         By categoryButton = By.xpath("//p[text()='Category']/following-sibling::button");
@@ -92,10 +91,11 @@ public class SheepPage {
     }
 
     /**
-     * Submit the sheep form
+     * Submit the sheep form by clicking the 'Add Sheep' button
      */
     public void submitSheepForm() {
-        driver.findElement(saveButton).click();
+        By addSheepButton = By.xpath("//button[contains(text(), 'Add Sheep')]");
+        wait.until(ExpectedConditions.elementToBeClickable(addSheepButton)).click();
     }
 
     /**
@@ -120,12 +120,11 @@ public class SheepPage {
     /**
      * Check if a sheep with the given number exists in the table
      */
-    public boolean sheepExists(String sheepNumber) {
+    public boolean sheepExists(int sheepNumber) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(sheepTable));
-        
         try {
             // Look for a sheep with the given number in the table
-            By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%s')]", sheepNumber));
+            By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%d')]", sheepNumber));
             return !driver.findElements(sheepNumberLocator).isEmpty();
         } catch (Exception e) {
             return false;

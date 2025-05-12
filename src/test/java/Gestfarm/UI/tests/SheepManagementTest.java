@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SheepManagementTest extends BaseSeleniumTest {
 
     private SheepPage sheepPage;
+    private final Random rand = new Random();
     
     @BeforeEach
     public void login() {
@@ -38,11 +39,9 @@ public class SheepManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test adding a new sheep")
     public void testAddSheep() {
-        // Generate unique name to avoid conflicts
-        String uniqueSheepName = "Test Sheep " + UUID.randomUUID().toString().substring(0, 8);
         int age = 2;
-        int number = 1001; // Example number
-        double weight = 45.5; // Example weight in kg
+        int number = rand.nextInt(1000); // Example number
+        int weight = 80; // Example weight in kg
         String category = "Category A"; // Example category
         String status = "Listed"; // Example status
 
@@ -60,7 +59,7 @@ public class SheepManagementTest extends BaseSeleniumTest {
         assertEquals(initialCount + 1, newCount, "Sheep count should increase by 1");
 
         // Verify the added sheep is in the list
-        assertTrue(sheepPage.sheepExists(uniqueSheepName), "Added sheep should appear in the list");
+        assertTrue(sheepPage.sheepExists(number), "Added sheep should appear in the list");
     }
 
       
