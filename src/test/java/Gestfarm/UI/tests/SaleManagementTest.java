@@ -40,46 +40,59 @@ public class SaleManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test adding a new sale")
     public void testAddSale() {
-        // First, ensure there's at least one sheep in the system
+        // Navigate to sheep page to ensure there's at least one sheep in the system
         AppNavigation navigation = new AppNavigation(driver);
-        navigation.goToSheepPage();
-        
-        sheepPage = new SheepPage(driver);
-        
-        String uniqueSheepName = "Sale Test Sheep " + UUID.randomUUID().toString().substring(0, 8);
-        
-        // Add a new sheep if needed
-        if (sheepPage.getSheepCount() == 0) {
-            sheepPage.clickAddSheep();
-            sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3, 0, 0, uniqueSheepName, uniqueSheepName);
-            sheepPage.submitSheepForm();
-        } else {
-            // Get the name of an existing sheep (this might not work if we can't easily get the sheep name)
-            uniqueSheepName = "Existing Sheep"; // Replace with a method to get existing sheep name if possible
-        }
-        
-        // Now navigate to sales page
+
+        // Navigate to sales page
         navigation.goToSalesPage();
         salesPage = new SalesPage(driver);
-        
+
         // Generate unique customer name to avoid conflicts
-        String uniqueCustomerName = "Test Customer " + UUID.randomUUID().toString().substring(0, 8);
-        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-        int quantity = 2;
-        double price = 150.0;
-        
+        String uniqueCustomerName = "Test Customer " ;
+        int amount = 1000;
+        int price = 5000;
+
         // Get initial count of sales
         int initialCount = salesPage.getSaleCount();
-        
-        // Add a new sale
+
+        // Add a new sale using the form structure
         salesPage.clickAddSale();
-        salesPage.fillSaleForm(uniqueCustomerName, currentDate, uniqueSheepName, quantity, price);
-        salesPage.submitSaleForm();
-        
+
+        // Interact with the form fields to add a sale
+        WebElement clientField = driver.findElement(By.cssSelector("input[placeholder='Client']"));
+        clientField.sendKeys(uniqueCustomerName);
+
+        WebElement priceField = driver.findElement(By.cssSelector("input[placeholder='Price']"));
+        priceField.sendKeys(String.valueOf(price));
+
+        WebElement amountField = driver.findElement(By.cssSelector("input[placeholder='Amount']"));
+        amountField.sendKeys(String.valueOf(amount));
+
+        WebElement statusButton = driver.findElement(By.xpath("//button[contains(@class, 'text-text-primary') and contains(., 'status')]"));
+        statusButton.click();
+        // Select a status option (assuming a dropdown or similar structure)
+        WebElement statusOption = driver.findElement(By.xpath("//li[text()='partially']"));
+        statusOption.click();
+
+        // Open the dropdown for selecting sheep
+        WebElement sheepDropdown = driver.findElement(By.xpath("//button[contains(@class, 'sheep-toggler')]"));
+        sheepDropdown.click();
+
+        // Wait until the checkboxes inside the dropdown are present
+        WebElement firstCheckbox = driver.findElement(By.xpath("(//div[contains(@class, 'tippy-box')]//input[@type='checkbox'])[1]"));
+
+        if (!firstCheckbox.isSelected()) {
+            firstCheckbox.click();
+        }
+
+        // Submit the form
+        WebElement submitButton = driver.findElement(By.xpath("//button[text()='Add Sales']"));
+        submitButton.click();
+
         // Verify the sale was added
         int newCount = salesPage.getSaleCount();
         assertEquals(initialCount + 1, newCount, "Sale count should increase by 1");
-        
+
         // Verify the added sale is in the list
         assertTrue(salesPage.saleExists(uniqueCustomerName), "Added sale should appear in the list");
     }
