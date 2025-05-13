@@ -18,6 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for login functionality
  */
 public class LoginTest extends BaseSeleniumTest {  
+
+     // Add a delay at the end of each test to observe changes in the browser
+    private void addDelay(int seconds) {
+        try {
+            Thread.sleep(seconds); // 5-second delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
     @Test
     @DisplayName("Test admin login and redirection")
     public void testAdminLogin() {
@@ -142,5 +153,39 @@ public class LoginTest extends BaseSeleniumTest {
         // Verify the error label appears for the email field
         WebElement emailLabel = driver.findElement(By.xpath("//label[text()='Email Address']/following-sibling::span[contains(@class, 'text-red-500') and contains(@class, 'scale-100')]"));
         assertNotNull(emailLabel, "Email label should indicate an error when the field is empty");
+    }
+
+    @Test
+    @DisplayName("Test logout functionality")
+    public void testLogout() {
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.navigateTo();
+
+        // Perform login first
+        loginPage.login("admin@gmail.com", "password123");
+        assertTrue(loginPage.isLoginSuccessful(), "Login should be successful before logout");
+
+        // Locate and click the logout button
+        WebElement logoutButton = driver.findElement(By.cssSelector("button.sidebar-element"));
+        logoutButton.click();
+        addDelay(2000);
+
+        // Wait for the logout confirmation dialog to appear
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement confirmationButton = wait.until(ExpectedConditions.elementToBeClickable(
+            By.cssSelector("button.confirmation-button")));
+
+        addDelay(1000);
+
+            // Scroll the confirmation button into view and click
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", confirmationButton);
+        wait.until(ExpectedConditions.elementToBeClickable(confirmationButton));
+        confirmationButton.click();
+
+        addDelay(1000);
+
+        // Verify redirection to the login page (URL should not contain 'app')
+        String currentUrl = driver.getCurrentUrl();
+        assertFalse(currentUrl.contains("app"), "URL should not contain 'app' after logout");
     }
 }
