@@ -66,9 +66,32 @@ public class SheepPage {
         retryClick(By.xpath("//p[text()='Category']/following-sibling::button"),
                    By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]"));
 
-        // Skip status dropdown and keep it as default
+       // Select status
+        retryClick(By.xpath("//p[text()='status']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][2]"));
 
-        // Skip age dropdown and keep it as default
+        // Select age
+        retryClick(By.xpath("//p[text()='age']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+    }
+    public void fillEditSheepForm(int number, double weight, String category) {
+        // Fill number
+        By numberInput = By.xpath("//input[@placeholder='Number']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(numberInput));
+        WebElement numberField = driver.findElement(numberInput);
+        numberField.clear();
+        numberField.sendKeys(String.valueOf(number));
+
+        // Fill weight
+        By weightInput = By.xpath("//input[@placeholder='Weight (kg)']");
+        WebElement weightField = driver.findElement(weightInput);
+        weightField.clear();
+        weightField.sendKeys(String.valueOf((int) weight)); // Cast weight to int to avoid decimal values
+
+        // Select category
+        retryClick(By.xpath("//p[text()='Category']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]"));
+
     }
 
     private void retryClick(By buttonLocator, By optionLocator) {
@@ -152,7 +175,7 @@ public class SheepPage {
     /**
      * Edit the first sheep in the table.
      */
-    public void editFirstSheep(int newNumber, double newWeight, String newCategory, String newStatus, String newAge) {
+    public void editFirstSheep(int newNumber, double newWeight, String newCategory) {
         // Locate the first row's action icon
         By firstRowActionIcon = By.xpath("//table//tbody/tr[1]//td[contains(@class, 'place-items-end')]//button[contains(@class, 'rounded-[4px]')]");
         wait.until(ExpectedConditions.elementToBeClickable(firstRowActionIcon)).click();
@@ -163,7 +186,7 @@ public class SheepPage {
         driver.findElement(editOption).click();
 
         // Fill the form with new details
-        fillSheepForm(newNumber, newWeight, newCategory, newStatus, newAge);
+        fillEditSheepForm(newNumber, newWeight, newCategory);
 
         // Submit the form by clicking 'Save Changes'
         WebElement submitButton = driver.findElement(By.xpath("//button[text()='Save Changes']"));
