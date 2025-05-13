@@ -7,6 +7,8 @@ import Gestfarm.UI.pages.ShipmentBasePage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -46,8 +48,7 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test adding a new shipment with sale, status, and shipper selection")
     public void testAddShipment() {
-        String phone = "1234567890";
-        
+        String phone = "06" + UUID.randomUUID().toString().substring(0, 9).replaceAll("-", "");
         String address = "Test Address";
         String shippingDate = "01-01-2025";
         String status = "pending";
@@ -61,6 +62,10 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
         shipmentPage.fillShipmentForm(phone, address, shippingDate);
 
         shipmentPage.submitShipmentForm();
+
+        // Wait for the shipment count to update after form submission
+        wait.until(ExpectedConditions.numberOfElementsToBe(
+                By.xpath("//table//tbody/tr"), initialCount + 1));
 
         // Verify the shipment was added
         int newCount = shipmentPage.getShipmentCount();
