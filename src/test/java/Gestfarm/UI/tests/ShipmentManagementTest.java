@@ -51,17 +51,14 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
         String phone = "06" + UUID.randomUUID().toString().substring(0, 9).replaceAll("-", "");
         String address = "Test Address";
         String shippingDate = "01-01-2025";
-        String status = "pending";
-        String shipper = "shipper";
 
         // Get initial count of shipments
         int initialCount = shipmentPage.getShipmentCount();
 
         // Add a new shipment
         shipmentPage.clickAddShipment();
-        shipmentPage.fillShipmentForm(phone, address, shippingDate);
-
-        shipmentPage.submitShipmentForm();
+        shipmentPage.fillShipmentForm(phone, address, shippingDate,false);
+        shipmentPage.submitShipmentForm(false);
 
         // Wait for the shipment count to update after form submission
         wait.until(ExpectedConditions.numberOfElementsToBe(
@@ -78,15 +75,15 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test editing a shipment")
     public void testEditShipment() {
-        String updatedShipmentName = "Updated Shipment";
-        String updatedDestination = "Updated Destination";
-        String updatedStatus = "Completed";
+        String phone = "0666666666"; 
+        String address = "the new Address";
+        String shippingDate = "01-01-2025";
 
         // Edit the first shipment
-        shipmentPage.editFirstShipment(updatedShipmentName, updatedDestination, updatedStatus);
+        shipmentPage.editFirstShipment(phone, address, shippingDate);
 
         // Verify the changes
-        assertTrue(shipmentPage.shipmentExists(updatedShipmentName), "Edited shipment should appear in the list with the updated name");
+        assertTrue(shipmentPage.shipmentExists(phone), "Edited shipment should appear in the list with the updated phone");
     }
 
     @Test

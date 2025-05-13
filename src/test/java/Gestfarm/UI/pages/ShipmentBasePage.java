@@ -46,29 +46,38 @@ public class ShipmentBasePage {
         addShipmentButton.click();
     }
 
-    public void fillShipmentForm(String phone, String address, String shippingDate) {
+    public void fillShipmentForm(String phone, String address, String shippingDate, boolean isEdit) {
+        // Wait for the form to be visible
         WebElement phoneField = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//input[@placeholder='Phone']")));
+        phoneField.clear();
         phoneField.sendKeys(phone);
 
         WebElement addressField = driver.findElement(By.xpath("//input[@placeholder='Address']"));
+        addressField.clear();
         addressField.sendKeys(address);
 
         WebElement shippingDateField = driver.findElement(By.xpath("//input[@placeholder='Shipping Date']"));
+        shippingDateField.clear();
         shippingDateField.sendKeys(shippingDate);
 
-        // Select Sale
-        retryClick(By.xpath("//p[text()='Sale']/following-sibling::button"),
-                By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+        if (isEdit) {
+            // Change status to 'Delivered'
+            retryClick(By.xpath("//p[contains(text(),'status')]/following-sibling::button"),
+                    By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option') and text()='delivered']"));
+        } else {
+            // Select Sale
+            retryClick(By.xpath("//p[text()='Sale']/following-sibling::button"),
+                    By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
 
-        // Select Status
-        retryClick(By.xpath("//p[contains(text(),'status')]/following-sibling::button"),
-                By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+            // Select Status
+            retryClick(By.xpath("//p[contains(text(),'status')]/following-sibling::button"),
+                    By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
 
-        // Select Shipper
-        retryClick(By.xpath("//p[text()='Shipper']/following-sibling::button"),
-                By.xpath(
-                        "//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option') and text()='shipper']"));
+            // Select Shipper
+            retryClick(By.xpath("//p[text()='Shipper']/following-sibling::button"),
+                    By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option') and text()='shipper']"));
+                    }
     }
 
     private void retryClick(By buttonLocator, By optionLocator) {
@@ -85,26 +94,31 @@ public class ShipmentBasePage {
         throw new StaleElementReferenceException("Failed to interact with element after retries");
     }
 
-    public void submitShipmentForm() {
-        By submitButton = By.xpath("//button[contains(text(), 'Add shipment')]");
+    public void submitShipmentForm(boolean isEdit) {
+        By submitButton = isEdit ? By.xpath("//button[contains(text(), 'Save Changes')]") : By.xpath("//button[contains(text(), 'Add shipment')]");
         wait.until(ExpectedConditions.elementToBeClickable(submitButton)).click();
     }
 
     public boolean shipmentExists(String name) {
-        return driver.findElements(By.xpath(String.format("//td[contains(text(), '%s')]", name))).size() > 0;
+        return !driver.findElements(By.xpath(String.format("//td[contains(text(), '%s')]", name))).isEmpty();
     }
 
-    public void editFirstShipment(String name, String destination, String status) {
+    public void editFirstShipment(String phone, String address, String shippingDate) {
         WebElement actionsButton = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//table//tbody/tr[1]//button[contains(@class, 'actions-button')]")));
+            By.xpath("//table//tbody/tr[1]//button[contains(@class, 'bg-background-secondary')]")
+        ));
         actionsButton.click();
 
         WebElement editOption = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//li[contains(text(), 'Edit')]")));
+            By.xpath("//li[contains(@class, 'dropdown-option') and contains(text(), 'Edit')]")
+        ));
         editOption.click();
 
-        // fillShipmentForm(name, destination, status);
-        submitShipmentForm();
+        // Fill the shipment form with updated details
+        fillShipmentForm(phone, address, shippingDate , true);
+
+        // Submit the updated shipment form
+        submitShipmentForm(true);
     }
 
     public void deleteFirstShipment() {
@@ -136,29 +150,9 @@ public class ShipmentBasePage {
     }
 
     public void selectDropdownOption(String optionText) {
-        // Re-locate the dropdown option to avoid stale element reference
-        By optionLocator = By
-                .xpath(String.format("//li[contains(@class, 'dropdown-option') and text()='%s']", optionText));
+        By optionLocator = By.xpath(String.format("//li[contains(@class, 'dropdown-option') and text()='%s']", optionText));
         WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
         option.click();
     }
 
-    public void selectFirstSale() {
-        openDropdown("Sale");
-        selectDropdownOption("");
-    }
-
-    public void selectStatus(String status) {
-        openDropdown("status");
-        // Wait for the dropdown options to be visible
-        addDelay(2000);
-        selectDropdownOption(status);
-    }
-
-    public void selectShipper(String shipper) {
-        openDropdown("Shipper");
-        // Wait for the dropdown options to be visible
-        addDelay(2000);
-        selectDropdownOption(shipper);
-    }
 }
