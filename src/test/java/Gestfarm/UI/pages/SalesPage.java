@@ -144,41 +144,42 @@ public class SalesPage {
         }
     }
 
-    /**
-     * Delete a sale with the given customer name
-     */
-    public void deleteSale(String customerName) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(saleTable));
+    // /**
+    //  * Delete a sale with the given customer name
+    //  */
+    // public void deleteSale(String customerName) {
+    //     wait.until(ExpectedConditions.visibilityOfElementLocated(saleTable));
         
-        // Find the row that contains the customer name
-        By rowLocator = By.xpath(String.format("//td[contains(text(),'%s')]/parent::tr", customerName));
-        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
+    //     // Find the row that contains the customer name
+    //     By rowLocator = By.xpath(String.format("//td[contains(text(),'%s')]/parent::tr", customerName));
+    //     WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
         
-        // Find and click the delete button in the actions column
-        WebElement deleteButton = row.findElement(By.xpath(".//button[contains(@class, 'delete') or contains(@aria-label, 'Delete')]"));
-        deleteButton.click();
+    //     // Find and click the delete button in the actions column
+    //     WebElement deleteButton = row.findElement(By.xpath(".//button[contains(@class, 'delete') or contains(@aria-label, 'Delete')]"));
+    //     deleteButton.click();
         
-        // Confirm deletion if there's a confirmation dialog
-        try {
-            By confirmButtonLocator = By.xpath("//div[contains(@class, 'modal')]//button[contains(text(), 'Delete') or contains(text(), 'Confirm') or contains(text(), 'Yes')]");
-            wait.until(ExpectedConditions.elementToBeClickable(confirmButtonLocator)).click();
-        } catch (Exception e) {
-            // No confirmation dialog or couldn't find the button
-        }
-    }
+    //      // Confirm deletion if there's a confirmation dialog
+    //     try {
+    //         By confirmButtonLocator = By.xpath("//div[contains(@class, 'modal')]//button[contains(text(), 'Delete') or contains(text(), 'Confirm') or contains(text(), 'Yes')]");
+    //         wait.until(ExpectedConditions.elementToBeClickable(confirmButtonLocator)).click();
+    //     } catch (Exception e) {
+    //         // No confirmation dialog or couldn't find the button
+    //     }
+    //     //*[@id="root"]/div[1]/div/div[2]/button[2]
+    // }
 
-    /**
-     * View details of a sale with the given customer name
-     */
-    public void viewSaleDetails(String customerName) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(saleTable));
+    // /**
+    //  * View details of a sale with the given customer name
+    //  */
+    // public void viewSaleDetails(String customerName) {
+    //     wait.until(ExpectedConditions.visibilityOfElementLocated(saleTable));
         
-        // Find the row that contains the customer name
-        By rowLocator = By.xpath(String.format("//td[contains(text(),'%s')]/parent::tr", customerName));
-        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
+    //     // Find the row that contains the customer name
+    //     By rowLocator = By.xpath(String.format("//td[contains(text(),'%s')]/parent::tr", customerName));
+    //     WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
         
-        // Find and click the view details button in the actions column
-        WebElement viewButton = row.findElement(By.xpath(".//button[contains(@class, 'view') or contains(@class, 'details') or contains(@aria-label, 'View')]"));
-        viewButton.click();
-    }
+    //     // Find and click the view details button in the actions column
+    //     WebElement viewButton = row.findElement(By.xpath(".//button[contains(@class, 'view') or contains(@class, 'details') or contains(@aria-label, 'View')]"));
+    //     viewButton.click();
+    // }
 }
