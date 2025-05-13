@@ -22,14 +22,15 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SaleManagementTest extends BaseSeleniumTest {
 
     private SalesPage salesPage;
-    
+    private WebDriverWait wait;
+
     @BeforeEach
     public void login() {
         // Login before each test
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
         loginPage.login("admin@gmail.com", "password123"); // Using admin credentials
-        
+
         // Navigate from root to dashboard
         AppNavigation navigation = new AppNavigation(driver);
         navigation.goToDashboardFromRoot();
@@ -44,6 +45,11 @@ public class SaleManagementTest extends BaseSeleniumTest {
         }
     }
 
+    @BeforeEach
+    public void setupWait() {
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
     @Test
     @DisplayName("Test adding a new sale")
     public void testAddSale() {
@@ -55,7 +61,7 @@ public class SaleManagementTest extends BaseSeleniumTest {
         salesPage = new SalesPage(driver);
 
         // Generate unique customer name to avoid conflicts
-        String uniqueCustomerName = "Test Customer " ;
+        String uniqueCustomerName = "Test Customer ";
         int amount = 1000;
         int price = 5000;
 
@@ -75,7 +81,8 @@ public class SaleManagementTest extends BaseSeleniumTest {
         WebElement amountField = driver.findElement(By.cssSelector("input[placeholder='Amount']"));
         amountField.sendKeys(String.valueOf(amount));
 
-        WebElement statusButton = driver.findElement(By.xpath("//button[contains(@class, 'text-text-primary') and contains(., 'status')]"));
+        WebElement statusButton = driver
+                .findElement(By.xpath("//button[contains(@class, 'text-text-primary') and contains(., 'status')]"));
         statusButton.click();
         // Select a status option (assuming a dropdown or similar structure)
         WebElement statusOption = driver.findElement(By.xpath("//li[text()='partially']"));
@@ -86,7 +93,8 @@ public class SaleManagementTest extends BaseSeleniumTest {
         sheepDropdown.click();
 
         // Wait until the checkboxes inside the dropdown are present
-        WebElement firstCheckbox = driver.findElement(By.xpath("(//div[contains(@class, 'tippy-box')]//input[@type='checkbox'])[1]"));
+        WebElement firstCheckbox = driver
+                .findElement(By.xpath("(//div[contains(@class, 'tippy-box')]//input[@type='checkbox'])[1]"));
 
         if (!firstCheckbox.isSelected()) {
             firstCheckbox.click();
@@ -118,7 +126,8 @@ public class SaleManagementTest extends BaseSeleniumTest {
         actionsButton.click();
 
         // Wait for the dropdown to appear and click on the Edit option
-        WebElement editOption = driver.findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Edit')]"));
+        WebElement editOption = driver
+                .findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Edit')]"));
         editOption.click();
 
         // Interact with the form fields to edit the sale
@@ -133,7 +142,6 @@ public class SaleManagementTest extends BaseSeleniumTest {
         WebElement amountField = driver.findElement(By.cssSelector("input[placeholder='Amount']"));
         amountField.clear();
         amountField.sendKeys("1200");
-
 
         // Submit the form
         WebElement submitButton = driver.findElement(By.xpath("//button[text()='Save Changes']"));
@@ -151,7 +159,6 @@ public class SaleManagementTest extends BaseSeleniumTest {
         addDelay(3000);
     }
 
-
     @Test
     @DisplayName("Test searching for sales")
     public void testSearchSale() {
@@ -159,7 +166,7 @@ public class SaleManagementTest extends BaseSeleniumTest {
         AppNavigation navigation = new AppNavigation(driver);
         navigation.goToSalesPage();
         salesPage = new SalesPage(driver);
-        
+
         // Locate the search input field and enter the customer name
         WebElement searchField = driver.findElement(By.cssSelector("input[type='search']"));
         searchField.sendKeys("Test Customer");
@@ -167,7 +174,7 @@ public class SaleManagementTest extends BaseSeleniumTest {
         // Verify the search results
         WebElement searchResult = driver.findElement(By.xpath("//td[contains(text(), 'Test Customer')]"));
         assertNotNull(searchResult, "Search result should contain the customer name");
-            addDelay(3000);
+        addDelay(3000);
 
     }
 
@@ -188,14 +195,16 @@ public class SaleManagementTest extends BaseSeleniumTest {
         actionsButton.click();
 
         // Wait for the dropdown to appear and click on the Delete option
-        WebElement deleteOption = driver.findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Delete')]"));
+        WebElement deleteOption = driver
+                .findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Delete')]"));
         deleteOption.click();
 
-        // Confirm the deletion in the confirmation dialog
-        WebElement confirmButton = driver.findElement(By.xpath("//button[contains(@class, 'confirmation-button') and contains(., 'Delete')]"));
-        confirmButton.click();
+        // Confirm deletion
+        By confirmDeleteButton = By.xpath("//button[contains(text(), 'Delete') and contains(@class, 'bg-red-600')]");
+        wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton)).click();
 
-        addDelay(3000);
+        // Wait for the table to update after deletion
+        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
 
         // Verify the sale was deleted
         int newCount = salesPage.getSaleCount();
@@ -211,7 +220,6 @@ public class SaleManagementTest extends BaseSeleniumTest {
         salesPage = new SalesPage(driver);
         int initialCount = salesPage.getSaleCount();
 
-        
         addDelay(1000);
         // Locate and check the last two checkboxes
         WebElement lastCheckbox1 = driver.findElement(By.xpath("(//input[@type='checkbox'])[last()-1]"));
@@ -227,18 +235,16 @@ public class SaleManagementTest extends BaseSeleniumTest {
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         WebElement deleteButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//div[contains(@class, 'absolute')]//button[contains(@class, 'bg-red-600') and text()='Delete']")
-        ));
+                By.xpath(
+                        "//div[contains(@class, 'absolute')]//button[contains(@class, 'bg-red-600') and text()='Delete']")));
         deleteButton.click();
 
-        // Confirm the deletion in the confirmation dialog
-        WebElement confirmButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//button[contains(@class, 'confirmation-button') and contains(., 'Delete')]")
-        ));
-        confirmButton.click();
+        // Confirm deletion
+        By confirmDeleteButton = By.xpath("//button[contains(text(), 'Delete') and contains(@class, 'bg-red-600')]");
+        wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton)).click();
 
-        // Add delay to observe changes
-        addDelay(2000);
+        // Wait for the table to update after deletion
+        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
 
         // Verify the rows are deleted (assuming sale count decreases by 2)
         int newCount = salesPage.getSaleCount();
