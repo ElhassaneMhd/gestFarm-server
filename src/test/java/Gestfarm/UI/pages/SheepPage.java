@@ -28,7 +28,6 @@ public class SheepPage {
     private final By categorySelector = By.xpath("//p[text()='Category']/following-sibling::div");
     private final By statusSelector = By.xpath("//p[text()='status']/following-sibling::div");
     private final By ageSelector = By.xpath("//p[text()='age']/following-sibling::div");
-    private final By saveButton = By.xpath("//button[contains(text(), 'Save')]");
 
     public SheepPage(WebDriver driver) {
         this.driver = driver;
@@ -55,51 +54,48 @@ public class SheepPage {
     /**
      * Fill the sheep form with the provided details
      */
-    public void fillSheepForm(String name, String breed, int age, int number, double weight, String category, String status) {
+    public void fillSheepForm(int number, double weight, String category, String status, String age) {
         // Fill number
+        By numberInput = By.xpath("//input[@placeholder='Number']");
         wait.until(ExpectedConditions.visibilityOfElementLocated(numberInput));
         WebElement numberField = driver.findElement(numberInput);
         numberField.clear();
         numberField.sendKeys(String.valueOf(number));
 
         // Fill weight
+        By weightInput = By.xpath("//input[@placeholder='Weight (kg)']");
         WebElement weightField = driver.findElement(weightInput);
         weightField.clear();
-        weightField.sendKeys(String.valueOf(weight));
+        weightField.sendKeys(String.valueOf((int) weight)); // Cast weight to int to avoid decimal values
 
         // Select category
-        try {
-            driver.findElement(categorySelector).click();
-            wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format("//div[contains(@class, 'dropdown')]//div[contains(text(), '%s')]", category)))).click();
-        } catch (Exception e) {
-            // If selecting category fails, continue
-        }
+        By categoryButton = By.xpath("//p[text()='Category']/following-sibling::button");
+        wait.until(ExpectedConditions.elementToBeClickable(categoryButton)).click();
+        By firstCategoryOption = By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(firstCategoryOption));
+        wait.until(ExpectedConditions.elementToBeClickable(firstCategoryOption)).click();
 
         // Select status
-        try {
-            driver.findElement(statusSelector).click();
-            wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format("//div[contains(@class, 'dropdown')]//div[contains(text(), '%s')]", status)))).click();
-        } catch (Exception e) {
-            // If selecting status fails, continue
-        }
+        By statusButton = By.xpath("//p[text()='status']/following-sibling::button");
+        wait.until(ExpectedConditions.elementToBeClickable(statusButton)).click();
+        By firstStatusOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][2]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(firstStatusOption));
+        wait.until(ExpectedConditions.elementToBeClickable(firstStatusOption)).click();
 
         // Select age
-        try {
-            driver.findElement(ageSelector).click();
-            wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format("//div[contains(@class, 'dropdown')]//div[contains(text(), '%s')]", age)))).click();
-        } catch (Exception e) {
-            // If selecting age fails, continue
-        }
+        By ageButton = By.xpath("//p[text()='age']/following-sibling::button");
+        wait.until(ExpectedConditions.elementToBeClickable(ageButton)).click();
+        By firstAgeOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(firstAgeOption));
+        wait.until(ExpectedConditions.elementToBeClickable(firstAgeOption)).click();
     }
 
     /**
-     * Submit the sheep form
+     * Submit the sheep form by clicking the 'Add Sheep' button
      */
     public void submitSheepForm() {
-        driver.findElement(saveButton).click();
+        By addSheepButton = By.xpath("//button[contains(text(), 'Add Sheep')]");
+        wait.until(ExpectedConditions.elementToBeClickable(addSheepButton)).click();
     }
 
     /**
@@ -124,12 +120,11 @@ public class SheepPage {
     /**
      * Check if a sheep with the given number exists in the table
      */
-    public boolean sheepExists(String sheepNumber) {
+    public boolean sheepExists(int sheepNumber) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(sheepTable));
-        
         try {
             // Look for a sheep with the given number in the table
-            By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%s')]", sheepNumber));
+            By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%d')]", sheepNumber));
             return !driver.findElements(sheepNumberLocator).isEmpty();
         } catch (Exception e) {
             return false;
@@ -157,5 +152,11 @@ public class SheepPage {
         } catch (Exception e) {
             // No confirmation dialog or couldn't find the button
         }
+    }
+
+    public void fillSheepForm(String sheepToDelete, String string, int i, int number, double weight, String category,
+            String status) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'fillSheepForm'");
     }
 }
