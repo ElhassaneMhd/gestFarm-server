@@ -114,4 +114,21 @@ public class SheepManagementTest extends BaseSeleniumTest {
         int newCount = sheepPage.getSheepCount();
         assertEquals(initialCount - 1, newCount, "Sheep count should decrease by 1 after deletion");
     }
+
+    @Test
+    @DisplayName("Test searching for a sheep by number")
+    public void testSearchSheep() {
+        // Example sheep number to search for
+        int sheepNumber = 832;
+
+        // Enter the sheep number in the search input
+        By searchInput = By.xpath("//div[@id='root']/div[3]/div/div/div/section/div/div/div[1]/div[1]/div/div//input[@type='search']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(searchInput));
+        driver.findElement(searchInput).sendKeys(String.valueOf(sheepNumber));
+
+        // Verify the sheep with the given number is displayed in the table
+        By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%d')]", sheepNumber));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(sheepNumberLocator));
+        assertTrue(driver.findElements(sheepNumberLocator).size() > 0, "Sheep with the given number should be displayed in the table");
+    }
 }
