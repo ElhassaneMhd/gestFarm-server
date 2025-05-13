@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -207,5 +208,51 @@ public class SaleManagementTest extends BaseSeleniumTest {
         // Verify the sale was deleted
         int newCount = salesPage.getSaleCount();
         assertEquals(initialCount - 1, newCount, "Sale count should decrease by 1");
+    }
+
+    @Test
+    @DisplayName("Test editing a sale")
+    public void testEditSale() {
+        // Navigate to sales page
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToSalesPage();
+        salesPage = new SalesPage(driver);
+
+        // Locate the actions button (three dots) for the first sale
+        WebElement actionsButton = driver.findElement(By.cssSelector("button svg.lucide-ellipsis"));
+        actionsButton.click();
+
+        // Wait for the dropdown to appear and click on the Edit option
+        WebElement editOption = driver.findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Edit')]"));
+        editOption.click();
+
+        // Interact with the form fields to edit the sale
+        WebElement clientField = driver.findElement(By.cssSelector("input[placeholder='Client']"));
+        clientField.clear();
+        clientField.sendKeys("Updated Customer");
+
+        WebElement priceField = driver.findElement(By.cssSelector("input[placeholder='Price']"));
+        priceField.clear();
+        priceField.sendKeys("6000");
+
+        WebElement amountField = driver.findElement(By.cssSelector("input[placeholder='Amount']"));
+        amountField.clear();
+        amountField.sendKeys("1200");
+
+
+        // Submit the form
+        WebElement submitButton = driver.findElement(By.xpath("//button[text()='Save Changes']"));
+        submitButton.click();
+
+        // Verify the sale was updated
+        WebElement updatedClient = driver.findElement(By.xpath("//tr[1]//td[contains(., 'Updated Customer')]"));
+        assertNotNull(updatedClient, "The sale should be updated with the new client name");
+
+        WebElement updatedPrice = driver.findElement(By.xpath("//tr[1]//td[contains(., '6000 Dh')]"));
+        assertNotNull(updatedPrice, "The sale should be updated with the new price");
+
+        WebElement updatedAmount = driver.findElement(By.xpath("//tr[1]//td[contains(., '1200 Dh')]"));
+        assertNotNull(updatedAmount, "The sale should be updated with the new amount");
+
     }
 }
