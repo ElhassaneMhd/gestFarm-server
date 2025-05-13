@@ -7,7 +7,11 @@ import Gestfarm.UI.pages.SheepPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,21 +23,27 @@ public class SheepManagementTest extends BaseSeleniumTest {
 
     private SheepPage sheepPage;
     private final Random rand = new Random();
-    
+    private WebDriverWait wait;
+
     @BeforeEach
     public void login() {
         // Login before each test
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigateTo();
         loginPage.login("admin@gmail.com", "password123"); // Using admin credentials
-        
+
         // Navigate from root to dashboard
         AppNavigation navigation = new AppNavigation(driver);
         navigation.goToDashboardFromRoot();
-        
+
         // Initialize the sheep page
         sheepPage = new SheepPage(driver);
         // No need to navigate again as we're already on the sheep page after dashboard navigation
+    }
+
+    @BeforeEach
+    public void setupWait() {
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     @Test
@@ -62,5 +72,63 @@ public class SheepManagementTest extends BaseSeleniumTest {
         assertTrue(sheepPage.sheepExists(number), "Added sheep should appear in the list");
     }
 
-      
+    @Test
+    @DisplayName("Test editing the first sheep")
+    public void testEditFirstSheep() {
+        // New details for the sheep
+        int newNumber = 2000;
+        int newWeight = 100;
+        String newCategory = "Category B";
+
+
+        // Edit the first sheep
+        sheepPage.editFirstSheep(newNumber, newWeight, newCategory);
+
+        // Verify the changes
+        assertTrue(sheepPage.sheepExists(newNumber), "Edited sheep should appear in the list with the new number");
+    }
+
+    @Test
+    @DisplayName("Test deleting the first sheep")
+    public void testDeleteFirstSheep() {
+        // Get initial count of sheep
+        int initialCount = sheepPage.getSheepCount();
+
+        // Delete the first sheep
+        By firstRowActionIcon = By.xpath("//table//tbody/tr[1]//td[contains(@class, 'place-items-end')]//button[contains(@class, 'rounded-[4px]')]");
+        wait.until(ExpectedConditions.elementToBeClickable(firstRowActionIcon)).click();
+
+        // Wait for the dropdown and click the Delete option
+        By deleteOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(text(), 'Delete')]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(deleteOption));
+        driver.findElement(deleteOption).click();
+
+        // Confirm deletion
+        By confirmDeleteButton = By.xpath("//button[contains(text(), 'Delete') and contains(@class, 'bg-red-600')]");
+        wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton)).click();
+
+        // Wait for the table to update after deletion
+        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
+
+        // Verify the sheep count decreased by 1
+        int newCount = sheepPage.getSheepCount();
+        assertEquals(initialCount - 1, newCount, "Sheep count should decrease by 1 after deletion");
+    }
+
+    @Test
+    @DisplayName("Test searching for a sheep by number")
+    public void testSearchSheep() {
+        // Example sheep number to search for
+        int sheepNumber = 832;
+
+        // Enter the sheep number in the search input
+        By searchInput = By.xpath("//div[@id='root']/div[3]/div/div/div/section/div/div/div[1]/div[1]/div/div//input[@type='search']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(searchInput));
+        driver.findElement(searchInput).sendKeys(String.valueOf(sheepNumber));
+
+        // Verify the sheep with the given number is displayed in the table
+        By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%d')]", sheepNumber));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(sheepNumberLocator));
+        assertTrue(driver.findElements(sheepNumberLocator).size() > 0, "Sheep with the given number should be displayed in the table");
+    }
 }

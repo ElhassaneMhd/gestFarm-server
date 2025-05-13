@@ -1,6 +1,7 @@
 package Gestfarm.UI.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -21,13 +22,6 @@ public class SheepPage {
     private final By sheepTable = By.xpath("//table");
     private final By sheepItems = By.xpath("//table//tbody/tr");
     private final By searchInput = By.xpath("//input[@placeholder='Search...']");
-
-    // Locators for the add/edit sheep form
-    private final By numberInput = By.name("number");
-    private final By weightInput = By.name("weight");
-    private final By categorySelector = By.xpath("//p[text()='Category']/following-sibling::div");
-    private final By statusSelector = By.xpath("//p[text()='status']/following-sibling::div");
-    private final By ageSelector = By.xpath("//p[text()='age']/following-sibling::div");
 
     public SheepPage(WebDriver driver) {
         this.driver = driver;
@@ -69,25 +63,49 @@ public class SheepPage {
         weightField.sendKeys(String.valueOf((int) weight)); // Cast weight to int to avoid decimal values
 
         // Select category
-        By categoryButton = By.xpath("//p[text()='Category']/following-sibling::button");
-        wait.until(ExpectedConditions.elementToBeClickable(categoryButton)).click();
-        By firstCategoryOption = By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(firstCategoryOption));
-        wait.until(ExpectedConditions.elementToBeClickable(firstCategoryOption)).click();
+        retryClick(By.xpath("//p[text()='Category']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]"));
 
-        // Select status
-        By statusButton = By.xpath("//p[text()='status']/following-sibling::button");
-        wait.until(ExpectedConditions.elementToBeClickable(statusButton)).click();
-        By firstStatusOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][2]");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(firstStatusOption));
-        wait.until(ExpectedConditions.elementToBeClickable(firstStatusOption)).click();
+       // Select status
+        retryClick(By.xpath("//p[text()='status']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][2]"));
 
         // Select age
-        By ageButton = By.xpath("//p[text()='age']/following-sibling::button");
-        wait.until(ExpectedConditions.elementToBeClickable(ageButton)).click();
-        By firstAgeOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(firstAgeOption));
-        wait.until(ExpectedConditions.elementToBeClickable(firstAgeOption)).click();
+        retryClick(By.xpath("//p[text()='age']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+    }
+    public void fillEditSheepForm(int number, double weight, String category) {
+        // Fill number
+        By numberInput = By.xpath("//input[@placeholder='Number']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(numberInput));
+        WebElement numberField = driver.findElement(numberInput);
+        numberField.clear();
+        numberField.sendKeys(String.valueOf(number));
+
+        // Fill weight
+        By weightInput = By.xpath("//input[@placeholder='Weight (kg)']");
+        WebElement weightField = driver.findElement(weightInput);
+        weightField.clear();
+        weightField.sendKeys(String.valueOf((int) weight)); // Cast weight to int to avoid decimal values
+
+        // Select category
+        retryClick(By.xpath("//p[text()='Category']/following-sibling::button"),
+                   By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]"));
+
+    }
+
+    private void retryClick(By buttonLocator, By optionLocator) {
+        for (int i = 0; i < 3; i++) { // Retry up to 3 times
+            try {
+                wait.until(ExpectedConditions.elementToBeClickable(buttonLocator)).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(optionLocator));
+                driver.findElement(optionLocator).click();
+                return; // Exit if successful
+            } catch (StaleElementReferenceException e) {
+                // Retry if stale element exception occurs
+            }
+        }
+        throw new StaleElementReferenceException("Failed to interact with element after retries");
     }
 
     /**
@@ -121,10 +139,10 @@ public class SheepPage {
      * Check if a sheep with the given number exists in the table
      */
     public boolean sheepExists(int sheepNumber) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(sheepTable));
+        By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%d')]", sheepNumber));
         try {
-            // Look for a sheep with the given number in the table
-            By sheepNumberLocator = By.xpath(String.format("//td[contains(text(),'%d')]", sheepNumber));
+            // Wait for the sheep number to appear in the table
+            wait.until(ExpectedConditions.presenceOfElementLocated(sheepNumberLocator));
             return !driver.findElements(sheepNumberLocator).isEmpty();
         } catch (Exception e) {
             return false;
@@ -154,7 +172,31 @@ public class SheepPage {
         }
     }
 
-    public void fillSheepForm(String sheepToDelete, String string, int i, int number, double weight, String category,
+    /**
+     * Edit the first sheep in the table.
+     */
+    public void editFirstSheep(int newNumber, double newWeight, String newCategory) {
+        // Locate the first row's action icon
+        By firstRowActionIcon = By.xpath("//table//tbody/tr[1]//td[contains(@class, 'place-items-end')]//button[contains(@class, 'rounded-[4px]')]");
+        wait.until(ExpectedConditions.elementToBeClickable(firstRowActionIcon)).click();
+
+        // Wait for the dropdown and click the Edit option
+        By editOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(text(), 'Edit')]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(editOption));
+        driver.findElement(editOption).click();
+
+        // Fill the form with new details
+        fillEditSheepForm(newNumber, newWeight, newCategory);
+
+        // Submit the form by clicking 'Save Changes'
+        WebElement submitButton = driver.findElement(By.xpath("//button[text()='Save Changes']"));
+        submitButton.click();
+        // Wait for the table to update with the new sheep details
+        By updatedSheepLocator = By.xpath(String.format("//td[contains(text(),'%d')]", newNumber));
+        wait.until(ExpectedConditions.presenceOfElementLocated(updatedSheepLocator));
+    }
+
+   public void fillSheepForm(String sheepToDelete, String string, int i, int number, double weight, String category,
             String status) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'fillSheepForm'");
