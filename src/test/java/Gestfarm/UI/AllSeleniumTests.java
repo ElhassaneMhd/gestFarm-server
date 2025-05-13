@@ -10,8 +10,8 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses({
     LoginTest.class,
-    SheepManagementTest.class,
     CategoryManagementTest.class,
+    SheepManagementTest.class,
     SaleManagementTest.class
 })
 public class AllSeleniumTests {

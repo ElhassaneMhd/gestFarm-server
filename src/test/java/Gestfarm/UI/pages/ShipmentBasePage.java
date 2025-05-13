@@ -8,6 +8,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * Page object for the Shipment page.
@@ -16,6 +17,9 @@ public class ShipmentBasePage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+
+    private final By shipmentTable = By.xpath("//table");
+    private final By shipmentItems = By.xpath("//table//tbody/tr");
 
     public ShipmentBasePage(WebDriver driver) {
         this.driver = driver;
@@ -31,7 +35,9 @@ public class ShipmentBasePage {
     }
 
     public int getShipmentCount() {
-        return driver.findElements(By.xpath("//table//tbody/tr")).size();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(shipmentTable));
+        List<WebElement> shipments = driver.findElements(shipmentItems);
+        return shipments.size();
     }
 
     public void clickAddShipment() {
@@ -61,7 +67,8 @@ public class ShipmentBasePage {
 
         // Select Shipper
         retryClick(By.xpath("//p[text()='Shipper']/following-sibling::button"),
-                By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option') and text()='shipper']"));
+                By.xpath(
+                        "//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option') and text()='shipper']"));
     }
 
     private void retryClick(By buttonLocator, By optionLocator) {
@@ -79,10 +86,7 @@ public class ShipmentBasePage {
     }
 
     public void submitShipmentForm() {
-        // Add a delay to ensure dropdown selections are finalized
-        addDelay(2000);
-
-        WebElement submitButton = driver.findElement(By.xpath("//button[contains(text(), 'Add shipment')]"));
+        By submitButton = By.xpath("//button[contains(text(), 'Add shipment')]");
         wait.until(ExpectedConditions.elementToBeClickable(submitButton)).click();
     }
 

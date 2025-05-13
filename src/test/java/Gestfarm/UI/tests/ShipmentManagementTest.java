@@ -46,9 +46,10 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test adding a new shipment with sale, status, and shipper selection")
     public void testAddShipment() {
-        String phone = "0622334455";
+        String phone = "1234567890";
+        
         String address = "Test Address";
-        String shippingDate = "2025-05-20";
+        String shippingDate = "01-01-2025";
         String status = "pending";
         String shipper = "shipper";
 
