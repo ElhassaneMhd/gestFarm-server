@@ -62,5 +62,20 @@ public class SheepManagementTest extends BaseSeleniumTest {
         assertTrue(sheepPage.sheepExists(number), "Added sheep should appear in the list");
     }
 
-      
+    @Test
+    @DisplayName("Test editing the first sheep")
+    public void testEditFirstSheep() {
+        // New details for the sheep
+        int newNumber = 2000;
+        int newWeight = 100;
+        String newCategory = "Category B";
+        String newStatus = "Sold";
+        String newAge = "2-3 years";
+
+        // Edit the first sheep
+        sheepPage.editFirstSheep(newNumber, newWeight, newCategory, newStatus, newAge);
+
+        // Verify the changes
+        assertTrue(sheepPage.sheepExists(newNumber), "Edited sheep should appear in the list with the new number");
+    }
 }

@@ -66,13 +66,9 @@ public class SheepPage {
         retryClick(By.xpath("//p[text()='Category']/following-sibling::button"),
                    By.xpath("//div[contains(@class, 'h-min overflow-scroll')]//li[contains(@class, 'dropdown-option')][1]"));
 
-        // Select status
-        retryClick(By.xpath("//p[text()='status']/following-sibling::button"),
-                   By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][2]"));
+        // Skip status dropdown and keep it as default
 
-        // Select age
-        retryClick(By.xpath("//p[text()='age']/following-sibling::button"),
-                   By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+        // Skip age dropdown and keep it as default
     }
 
     private void retryClick(By buttonLocator, By optionLocator) {
@@ -153,7 +149,31 @@ public class SheepPage {
         }
     }
 
-    public void fillSheepForm(String sheepToDelete, String string, int i, int number, double weight, String category,
+    /**
+     * Edit the first sheep in the table.
+     */
+    public void editFirstSheep(int newNumber, double newWeight, String newCategory, String newStatus, String newAge) {
+        // Locate the first row's action icon
+        By firstRowActionIcon = By.xpath("//table//tbody/tr[1]//td[contains(@class, 'place-items-end')]//button[contains(@class, 'rounded-[4px]')]");
+        wait.until(ExpectedConditions.elementToBeClickable(firstRowActionIcon)).click();
+
+        // Wait for the dropdown and click the Edit option
+        By editOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(text(), 'Edit')]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(editOption));
+        driver.findElement(editOption).click();
+
+        // Fill the form with new details
+        fillSheepForm(newNumber, newWeight, newCategory, newStatus, newAge);
+
+        // Submit the form by clicking 'Save Changes'
+        WebElement submitButton = driver.findElement(By.xpath("//button[text()='Save Changes']"));
+        submitButton.click();
+        // Wait for the table to update with the new sheep details
+        By updatedSheepLocator = By.xpath(String.format("//td[contains(text(),'%d')]", newNumber));
+        wait.until(ExpectedConditions.presenceOfElementLocated(updatedSheepLocator));
+    }
+
+   public void fillSheepForm(String sheepToDelete, String string, int i, int number, double weight, String category,
             String status) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'fillSheepForm'");
