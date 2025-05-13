@@ -1,6 +1,7 @@
 package Gestfarm.UI.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -8,22 +9,25 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-public class ShipmentPage {
+/**
+ * Page object for the Shipment page.
+ */
+public class ShipmentBasePage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
 
-     private void addDelay(int seconds) {
+    public ShipmentBasePage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    private void addDelay(int seconds) {
         try {
             Thread.sleep(seconds); // 5-second delay
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }
-
-    public ShipmentPage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     public int getShipmentCount() {
@@ -32,15 +36,13 @@ public class ShipmentPage {
 
     public void clickAddShipment() {
         WebElement addShipmentButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//button[contains(text(), 'New shipment')]")
-        ));
+                By.xpath("//button[contains(text(), 'New shipment')]")));
         addShipmentButton.click();
     }
 
     public void fillShipmentForm(String phone, String address, String shippingDate) {
         WebElement phoneField = wait.until(ExpectedConditions.visibilityOfElementLocated(
-            By.xpath("//input[@placeholder='Phone']")
-        ));
+                By.xpath("//input[@placeholder='Phone']")));
         phoneField.sendKeys(phone);
 
         WebElement addressField = driver.findElement(By.xpath("//input[@placeholder='Address']"));
@@ -49,14 +51,39 @@ public class ShipmentPage {
         WebElement shippingDateField = driver.findElement(By.xpath("//input[@placeholder='Shipping Date']"));
         shippingDateField.sendKeys(shippingDate);
 
-        WebElement statusDropdown = driver.findElement(By.xpath("//button[contains(@class, 'bg-background-secondary') and contains(., 'status')]"));
-        statusDropdown.click();
- 
+        // Select Sale
+        retryClick(By.xpath("//p[text()='Sale']/following-sibling::button"),
+                By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+
+        // Select Status
+        retryClick(By.xpath("//p[contains(text(),'status')]/following-sibling::button"),
+                By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option')][1]"));
+
+        // Select Shipper
+        retryClick(By.xpath("//p[text()='Shipper']/following-sibling::button"),
+                By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(@class, 'dropdown-option') and text()='shipper']"));
+    }
+
+    private void retryClick(By buttonLocator, By optionLocator) {
+        for (int i = 0; i < 3; i++) { // Retry up to 3 times
+            try {
+                wait.until(ExpectedConditions.elementToBeClickable(buttonLocator)).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(optionLocator));
+                driver.findElement(optionLocator).click();
+                return; // Exit if successful
+            } catch (StaleElementReferenceException e) {
+                // Retry if stale element exception occurs
+            }
+        }
+        throw new StaleElementReferenceException("Failed to interact with element after retries");
     }
 
     public void submitShipmentForm() {
+        // Add a delay to ensure dropdown selections are finalized
+        addDelay(2000);
+
         WebElement submitButton = driver.findElement(By.xpath("//button[contains(text(), 'Add shipment')]"));
-        submitButton.click();
+        wait.until(ExpectedConditions.elementToBeClickable(submitButton)).click();
     }
 
     public boolean shipmentExists(String name) {
@@ -65,13 +92,11 @@ public class ShipmentPage {
 
     public void editFirstShipment(String name, String destination, String status) {
         WebElement actionsButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//table//tbody/tr[1]//button[contains(@class, 'actions-button')]")
-        ));
+                By.xpath("//table//tbody/tr[1]//button[contains(@class, 'actions-button')]")));
         actionsButton.click();
 
         WebElement editOption = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//li[contains(text(), 'Edit')]")
-        ));
+                By.xpath("//li[contains(text(), 'Edit')]")));
         editOption.click();
 
         // fillShipmentForm(name, destination, status);
@@ -80,39 +105,37 @@ public class ShipmentPage {
 
     public void deleteFirstShipment() {
         WebElement actionsButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//table//tbody/tr[1]//button[contains(@class, 'actions-button')]")
-        ));
+                By.xpath("//table//tbody/tr[1]//button[contains(@class, 'actions-button')]")));
         actionsButton.click();
 
         WebElement deleteOption = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//li[contains(text(), 'Delete')]")
-        ));
+                By.xpath("//li[contains(text(), 'Delete')]")));
         deleteOption.click();
 
         WebElement confirmDeleteButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//button[contains(text(), 'Delete') and contains(@class, 'confirm-button')]")
-        ));
+                By.xpath("//button[contains(text(), 'Delete') and contains(@class, 'confirm-button')]")));
         confirmDeleteButton.click();
     }
 
     public void searchShipment(String name) {
         WebElement searchField = wait.until(ExpectedConditions.visibilityOfElementLocated(
-            By.xpath("//input[@type='search']")
-        ));
+                By.xpath("//input[@type='search']")));
         searchField.sendKeys(name);
     }
 
     public void openDropdown(String dropdownText) {
         WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath(String.format("//button[contains(@class, 'text-text-primary') and span[contains(text(), '%s')]]", dropdownText))
-        ));
+                By.xpath(String.format(
+                        "//button[contains(@class, 'text-text-primary') and span[contains(text(), '%s')]]",
+                        dropdownText))));
         dropdown.click();
     }
 
     public void selectDropdownOption(String optionText) {
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath(String.format("//li[text()='%s']", optionText))
-        ));
+        // Re-locate the dropdown option to avoid stale element reference
+        By optionLocator = By
+                .xpath(String.format("//li[contains(@class, 'dropdown-option') and text()='%s']", optionText));
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
         option.click();
     }
 

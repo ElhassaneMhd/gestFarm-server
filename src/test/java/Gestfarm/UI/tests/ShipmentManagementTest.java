@@ -3,7 +3,7 @@ package Gestfarm.UI.tests;
 import Gestfarm.UI.AppNavigation;
 import Gestfarm.UI.BaseSeleniumTest;
 import Gestfarm.UI.pages.LoginPage;
-import Gestfarm.UI.pages.ShipmentPage;
+import Gestfarm.UI.pages.ShipmentBasePage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ShipmentManagementTest extends BaseSeleniumTest {
 
-    private ShipmentPage shipmentPage;
+    private ShipmentBasePage shipmentPage;
     private WebDriverWait wait;
 
     @BeforeEach
@@ -35,7 +35,7 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
 
         // Navigate to shipments page and initialize the shipment page
         navigation.goToShipmentsPage();
-        shipmentPage = new ShipmentPage(driver);
+        shipmentPage = new ShipmentBasePage(driver);
     }
 
     @BeforeEach
@@ -58,17 +58,6 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
         // Add a new shipment
         shipmentPage.clickAddShipment();
         shipmentPage.fillShipmentForm(phone, address, shippingDate);
-
-        
-        shipmentPage.openDropdown("status");
-        shipmentPage.selectDropdownOption(status);
-
-        shipmentPage.openDropdown("Shipper");   
-        shipmentPage.selectDropdownOption(shipper);
-
-        shipmentPage.openDropdown("Sale");
-        shipmentPage.selectDropdownOption("First Sale");
-
 
         shipmentPage.submitShipmentForm();
 
