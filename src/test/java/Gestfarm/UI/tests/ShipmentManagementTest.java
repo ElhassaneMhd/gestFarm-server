@@ -27,6 +27,15 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
     private ShipmentBasePage shipmentPage;
     private WebDriverWait wait;
 
+      // Add a delay at the end of each test to observe changes in the browser
+    private void addDelay(int seconds) {
+        try {
+            Thread.sleep(seconds); // 5-second delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    
     @BeforeEach
     public void login() {
         // Login before each test
@@ -51,7 +60,7 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test adding a new shipment with sale, status, and shipper selection")
     public void testAddShipment() {
-        String phone = "06" + UUID.randomUUID().toString().substring(0, 9).replaceAll("-", "");
+        String phone = "06" + (int)(Math.random() * 100000000);
         String address = "Test Address";
         String shippingDate = "01-01-2025";
 
@@ -157,12 +166,15 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Test searching for a shipment")
     public void testSearchShipment() {
-        String shipmentName = "Test Shipment";
+        String shipmentNumber = "0666666666"; 
 
         // Search for the shipment
-        shipmentPage.searchShipment(shipmentName);
+        shipmentPage.searchShipment(shipmentNumber);
+
+        // Wait for the search results to update
+        addDelay(2000); // Adjust this delay as needed
 
         // Verify the shipment is displayed in the search results
-        assertTrue(shipmentPage.shipmentExists(shipmentName), "Shipment should appear in the search results");
+        assertTrue(shipmentPage.shipmentExists(shipmentNumber), "Shipment should appear in the search results");
     }
 }
