@@ -4,17 +4,15 @@ import Gestfarm.UI.AppNavigation;
 import Gestfarm.UI.BaseSeleniumTest;
 import Gestfarm.UI.pages.LoginPage;
 import Gestfarm.UI.pages.SalesPage;
-import Gestfarm.UI.pages.SheepPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SaleManagementTest extends BaseSeleniumTest {
 
     private SalesPage salesPage;
-    private SheepPage sheepPage;
     
     @BeforeEach
     public void login() {
@@ -36,6 +33,15 @@ public class SaleManagementTest extends BaseSeleniumTest {
         // Navigate from root to dashboard
         AppNavigation navigation = new AppNavigation(driver);
         navigation.goToDashboardFromRoot();
+    }
+
+    // Add a delay at the end of each test to observe changes in the browser
+    private void addDelay(int seconds) {
+        try {
+            Thread.sleep(seconds); // 5-second delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Test
@@ -90,124 +96,13 @@ public class SaleManagementTest extends BaseSeleniumTest {
         WebElement submitButton = driver.findElement(By.xpath("//button[text()='Add Sales']"));
         submitButton.click();
 
+        addDelay(2000);
         // Verify the sale was added
         int newCount = salesPage.getSaleCount();
         assertEquals(initialCount + 1, newCount, "Sale count should increase by 1");
 
         // Verify the added sale is in the list
         assertTrue(salesPage.saleExists(uniqueCustomerName), "Added sale should appear in the list");
-    }
-
-    @Test
-    @DisplayName("Test searching for sales")
-    public void testSearchSale() {
-        // Navigate to sales page
-        AppNavigation navigation = new AppNavigation(driver);
-        navigation.goToSalesPage();
-        
-        salesPage = new SalesPage(driver);
-        
-        // First add a sale with a unique customer name if table is empty
-        if (salesPage.getSaleCount() == 0) {
-            String uniqueCustomerName = "SearchTest " + UUID.randomUUID().toString().substring(0, 8);
-            
-            // First, ensure there's at least one sheep in the system
-            navigation.goToSheepPage();
-            sheepPage = new SheepPage(driver);
-            
-            String uniqueSheepName = "Search Test Sheep " + UUID.randomUUID().toString().substring(0, 8);
-            
-            // Add a new sheep if needed
-            if (sheepPage.getSheepCount() == 0) {
-                sheepPage.clickAddSheep();
-                sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3, 0, 0, uniqueSheepName, uniqueSheepName);
-                sheepPage.submitSheepForm();
-            } else {
-                uniqueSheepName = "Existing Sheep"; // Replace with a method to get existing sheep name if possible
-            }
-            
-            // Back to sales page
-            navigation.goToSalesPage();
-            
-            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-            
-            salesPage.clickAddSale();
-            salesPage.fillSaleForm(uniqueCustomerName, currentDate, uniqueSheepName, 1, 100.0);
-            salesPage.submitSaleForm();
-        }
-        
-        // Get a search term from an existing sale (this approach is simplified and may need to be adjusted)
-        String searchTerm = "Test";
-        
-        // Search for the sale
-        salesPage.searchSale(searchTerm);
-        
-        // Verify search results exist
-        assertTrue(salesPage.getSaleCount() > 0, "Search should return at least one result");
-    }
-
-    @Test
-    @DisplayName("Test deleting a sale")
-    public void testDeleteSale() {
-        // Navigate to sales page
-        AppNavigation navigation = new AppNavigation(driver);
-        navigation.goToSalesPage();
-        
-        salesPage = new SalesPage(driver);
-        
-        // First add a sale to delete if table is empty
-        String saleToDelete = "DeleteTest " + UUID.randomUUID().toString().substring(0, 8);
-        
-        if (salesPage.getSaleCount() == 0) {
-            // First, ensure there's at least one sheep in the system
-            navigation.goToSheepPage();
-            sheepPage = new SheepPage(driver);
-            
-            String uniqueSheepName = "Delete Test Sheep " + UUID.randomUUID().toString().substring(0, 8);
-            
-            // Add a new sheep if needed
-            if (sheepPage.getSheepCount() == 0) {
-                sheepPage.clickAddSheep();
-                sheepPage.fillSheepForm(uniqueSheepName, "Test Breed", 3, 0, 0, uniqueSheepName, uniqueSheepName);
-                sheepPage.submitSheepForm();
-            } else {
-                uniqueSheepName = "Existing Sheep"; // Replace with a method to get existing sheep name if possible
-            }
-            
-            // Back to sales page
-            navigation.goToSalesPage();
-            
-            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-            
-            salesPage.clickAddSale();
-            salesPage.fillSaleForm(saleToDelete, currentDate, uniqueSheepName, 1, 100.0);
-            salesPage.submitSaleForm();
-        } else {
-            // Use an existing sale - this is a simplification
-            // In a real scenario, you'd want to get the name of an existing sale
-            saleToDelete = "Existing Customer"; // Replace with a method to get an existing customer name
-        }
-        
-        // Verify the sale exists
-        assertTrue(salesPage.saleExists(saleToDelete) || salesPage.getSaleCount() > 0, 
-                  "Sale should exist or there should be at least one sale");
-        
-        // Get initial count
-        int initialCount = salesPage.getSaleCount();
-        
-        // Delete the sale (this will delete the first sale if saleToDelete doesn't exist)
-        if (salesPage.saleExists(saleToDelete)) {
-            salesPage.deleteSale(saleToDelete);
-        } else {
-            // Get the first sale's customer name and delete it
-            WebElement firstSaleCustomerNameElement = driver.findElement(By.cssSelector(".sale-item td:first-child"));
-            String firstSaleCustomerName = firstSaleCustomerNameElement.getText();
-            salesPage.deleteSale(firstSaleCustomerName);
-        }
-        
-        // Verify the sale was deleted
-        int newCount = salesPage.getSaleCount();
-        assertEquals(initialCount - 1, newCount, "Sale count should decrease by 1");
     }
 
     @Test
@@ -253,6 +148,101 @@ public class SaleManagementTest extends BaseSeleniumTest {
 
         WebElement updatedAmount = driver.findElement(By.xpath("//tr[1]//td[contains(., '1200 Dh')]"));
         assertNotNull(updatedAmount, "The sale should be updated with the new amount");
+        addDelay(3000);
+    }
+
+
+    @Test
+    @DisplayName("Test searching for sales")
+    public void testSearchSale() {
+        // Navigate to sales page
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToSalesPage();
+        salesPage = new SalesPage(driver);
+        
+        // Locate the search input field and enter the customer name
+        WebElement searchField = driver.findElement(By.cssSelector("input[type='search']"));
+        searchField.sendKeys("Test Customer");
+
+        // Verify the search results
+        WebElement searchResult = driver.findElement(By.xpath("//td[contains(text(), 'Test Customer')]"));
+        assertNotNull(searchResult, "Search result should contain the customer name");
+            addDelay(3000);
 
     }
+
+    @Test
+    @DisplayName("Test deleting a sale ")
+    public void testDeleteSale() {
+        // Navigate to sales page
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToSalesPage();
+
+        salesPage = new SalesPage(driver);
+
+        // Get initial count
+        int initialCount = salesPage.getSaleCount();
+
+        // Locate the actions button (three dots) for the sale
+        WebElement actionsButton = driver.findElement(By.cssSelector("button svg.lucide-ellipsis"));
+        actionsButton.click();
+
+        // Wait for the dropdown to appear and click on the Delete option
+        WebElement deleteOption = driver.findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Delete')]"));
+        deleteOption.click();
+
+        // Confirm the deletion in the confirmation dialog
+        WebElement confirmButton = driver.findElement(By.xpath("//button[contains(@class, 'confirmation-button') and contains(., 'Delete')]"));
+        confirmButton.click();
+
+        addDelay(3000);
+
+        // Verify the sale was deleted
+        int newCount = salesPage.getSaleCount();
+        assertEquals(initialCount - 1, newCount, "Sale count should decrease by 1");
+    }
+
+    @Test
+    @DisplayName("Test multiple delete with checkboxes")
+    public void testMultipleDelete() {
+        // Navigate to sales page
+        AppNavigation navigation = new AppNavigation(driver);
+        navigation.goToSalesPage();
+        salesPage = new SalesPage(driver);
+        int initialCount = salesPage.getSaleCount();
+
+        
+        addDelay(1000);
+        // Locate and check the last two checkboxes
+        WebElement lastCheckbox1 = driver.findElement(By.xpath("(//input[@type='checkbox'])[last()-1]"));
+        WebElement lastCheckbox2 = driver.findElement(By.xpath("(//input[@type='checkbox'])[last()]"));
+
+        if (!lastCheckbox1.isSelected()) {
+            lastCheckbox1.click();
+        }
+
+        if (!lastCheckbox2.isSelected()) {
+            lastCheckbox2.click();
+        }
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement deleteButton = wait.until(ExpectedConditions.elementToBeClickable(
+            By.xpath("//div[contains(@class, 'absolute')]//button[contains(@class, 'bg-red-600') and text()='Delete']")
+        ));
+        deleteButton.click();
+
+        // Confirm the deletion in the confirmation dialog
+        WebElement confirmButton = wait.until(ExpectedConditions.elementToBeClickable(
+            By.xpath("//button[contains(@class, 'confirmation-button') and contains(., 'Delete')]")
+        ));
+        confirmButton.click();
+
+        // Add delay to observe changes
+        addDelay(2000);
+
+        // Verify the rows are deleted (assuming sale count decreases by 2)
+        int newCount = salesPage.getSaleCount();
+        assertEquals(initialCount - 2, newCount, "Sale count should decrease by 2 after multiple delete");
+    }
+
 }
