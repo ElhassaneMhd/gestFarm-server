@@ -17,19 +17,13 @@ public class CategoriesPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
-    // Locators for elements on the categories page - updated based on actual implementation
-    private final By addCategoryButton = By.xpath("//button[contains(@class, 'add-button') or contains(text(), 'New')]");
+    // Locators for elements on the categories page - updated based on actual
+    // implementation
+    private final By addCategoryButton = By
+            .xpath("//button[contains(@class, 'add-button') or contains(text(), 'New')]");
     private final By categoryTable = By.xpath("//table");
     private final By categoryItems = By.xpath("//table//tbody/tr");
     private final By searchInput = By.xpath("//input[@placeholder='Search...']");
-
-    // Locators for the add/edit category form
-    private final By nameInput = By.name("name");
-    private final By priceInput = By.name("price");
-    private final By descriptionInput = By.name("description");
-    private final By imageUploadArea = By.xpath("//div[contains(@class, 'uploader')]");
-    private final By saveButton = By.xpath("//button[contains(text(), 'Save')]");
-    private final By cancelButton = By.xpath("//button[contains(text(), 'Cancel')]");
 
     public CategoriesPage(WebDriver driver) {
         this.driver = driver;
@@ -53,40 +47,37 @@ public class CategoriesPage {
     /**
      * Fill the category form with the provided details
      */
-    public void fillCategoryForm(String name, String description) {
+    public void fillCategoryForm(String name, String description, String price) {
+        // Fill name
+        By nameInput = By.xpath("//input[@placeholder='Name']");
         wait.until(ExpectedConditions.visibilityOfElementLocated(nameInput));
-        
-        // Enter name
         WebElement nameField = driver.findElement(nameInput);
         nameField.clear();
         nameField.sendKeys(name);
-        
-        // Enter price (required field)
+
+        // Fill price
+        By priceInput = By.xpath("//input[@placeholder='Price (Dh/Kg)']");
         WebElement priceField = driver.findElement(priceInput);
         priceField.clear();
-        priceField.sendKeys("100"); // Default price
-        
-        // Enter description
-        WebElement descField = driver.findElement(descriptionInput);
-        descField.clear();
-        descField.sendKeys(description);
-        
-        // Handle image upload if needed
-        try {
-            // This is a simplified approach - actual implementation may need file upload
-            WebElement uploadElement = driver.findElement(imageUploadArea);
-            // In a real test, you'd use sendKeys with a file path if it's a standard input type=file
-            // or interact with custom uploader components
-        } catch (Exception e) {
-            // If image upload fails, continue
-        }
+        priceField.sendKeys(price);
+
+        // Fill description
+        By descriptionInput = By.xpath("//textarea[@placeholder='Enter category description ...']");
+        WebElement descriptionField = driver.findElement(descriptionInput);
+        descriptionField.clear();
+        descriptionField.sendKeys(description);
+
     }
 
     /**
      * Submit the category form
      */
     public void submitCategoryForm() {
-        driver.findElement(saveButton).click();
+        // Ensure the 'Save' button is clicked
+        By saveButton = By.xpath("//button[contains(text(), 'Add Categories')]"); // Adjusted XPath to match the modal
+                                                                                  // structure
+        WebElement saveButtonElement = wait.until(ExpectedConditions.elementToBeClickable(saveButton));
+        saveButtonElement.click();
     }
 
     /**
@@ -112,11 +103,12 @@ public class CategoriesPage {
      * Check if a category with the given name exists in the table
      */
     public boolean categoryExists(String categoryName) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(categoryTable));
-        
+        By categoryNameLocator = By.xpath(String.format("//td[contains(text(),'%s')]", categoryName));
+
         try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(categoryNameLocator));
+
             // Look for a category with the given name in the table
-            By categoryNameLocator = By.xpath(String.format("//td[contains(text(),'%s')]", categoryName));
             return !driver.findElements(categoryNameLocator).isEmpty();
         } catch (Exception e) {
             return false;
@@ -128,18 +120,20 @@ public class CategoriesPage {
      */
     public void deleteCategory(String categoryName) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(categoryTable));
-        
+
         // Find the row that contains the category name
         By rowLocator = By.xpath(String.format("//td[contains(text(),'%s')]/parent::tr", categoryName));
         WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
-        
+
         // Find and click the delete button in the actions column
-        WebElement deleteButton = row.findElement(By.xpath(".//button[contains(@class, 'delete') or contains(@aria-label, 'Delete')]"));
+        WebElement deleteButton = row
+                .findElement(By.xpath(".//button[contains(@class, 'delete') or contains(@aria-label, 'Delete')]"));
         deleteButton.click();
-        
+
         // Confirm deletion if there's a confirmation dialog
         try {
-            By confirmButtonLocator = By.xpath("//div[contains(@class, 'modal')]//button[contains(text(), 'Delete') or contains(text(), 'Confirm') or contains(text(), 'Yes')]");
+            By confirmButtonLocator = By.xpath(
+                    "//div[contains(@class, 'modal')]//button[contains(text(), 'Delete') or contains(text(), 'Confirm') or contains(text(), 'Yes')]");
             wait.until(ExpectedConditions.elementToBeClickable(confirmButtonLocator)).click();
         } catch (Exception e) {
             // No confirmation dialog or couldn't find the button
@@ -147,17 +141,28 @@ public class CategoriesPage {
     }
 
     /**
-     * Edit a category with the given name
+     * Edit the name of a category
      */
-    public void editCategory(String categoryName) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(categoryTable));
-        
-        // Find the row that contains the category name
-        By rowLocator = By.xpath(String.format("//td[contains(text(),'%s')]/parent::tr", categoryName));
-        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
-        
-        // Find and click the edit button in the actions column
-        WebElement editButton = row.findElement(By.xpath(".//button[contains(@class, 'edit') or contains(@aria-label, 'Edit')]"));
-        editButton.click();
+    public void editFirstCategory(String newName, String newDescription, String newPrice) {
+        // Locate the first row's action icon
+        By firstRowActionIcon = By.xpath(
+                "//table//tbody/tr[1]//td[contains(@class, 'place-items-end')]//button[contains(@class, 'rounded-[4px]')]");
+        wait.until(ExpectedConditions.elementToBeClickable(firstRowActionIcon)).click();
+
+        // Wait for the dropdown and click the Edit option
+        By editOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(text(), 'Edit')]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(editOption));
+        driver.findElement(editOption).click();
+
+        // Fill the form with new details
+        fillCategoryForm(newName, newDescription, newPrice);
+
+        // Submit the form by clicking 'Save Changes'
+        WebElement submitButton = driver.findElement(By.xpath("//button[text()='Save Changes']"));
+        submitButton.click();
+        // Wait for the table to update with the new sheep details
+        By updatedSheepLocator = By.xpath(String.format("//td[contains(text(),'%s')]", newName));
+        wait.until(ExpectedConditions.presenceOfElementLocated(updatedSheepLocator));
+
     }
 }
