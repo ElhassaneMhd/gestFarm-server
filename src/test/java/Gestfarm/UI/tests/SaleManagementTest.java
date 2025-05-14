@@ -66,11 +66,11 @@ public class SaleManagementTest extends BaseSeleniumTest {
         int price = 5000;
 
         // Get initial count of sales, handle empty table gracefully
-        int initialCount;
+        int initialCount = 0;
         try {
             initialCount = salesPage.getSaleCount();
         } catch (Exception e) {
-            initialCount = 0;
+            initialCount = 0; // Table is empty
         }
 
         // Add a new sale using the form structure
@@ -130,10 +130,11 @@ public class SaleManagementTest extends BaseSeleniumTest {
         WebElement actionsButton = driver.findElement(By.cssSelector("button svg.lucide-ellipsis"));
         actionsButton.click();
 
-        // Wait for the dropdown to appear and click on the Edit option
-        WebElement editOption = driver
-                .findElement(By.xpath("//li[contains(@class, 'dropdown-option') and contains(., 'Edit')]"));
-        editOption.click();
+             // Wait for the dropdown and click the Edit option
+        By editOption = By.xpath("//div[contains(@class, 'tippy-content')]//li[contains(text(), 'Edit')]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(editOption));
+        driver.findElement(editOption).click();
+
 
         // Interact with the form fields to edit the sale
         WebElement clientField = driver.findElement(By.cssSelector("input[placeholder='Client']"));
@@ -209,11 +210,22 @@ public class SaleManagementTest extends BaseSeleniumTest {
         wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton)).click();
 
         // Wait for the table to update after deletion
-        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
-
-        // Verify the sale was deleted
-        int newCount = salesPage.getSaleCount();
-        assertEquals(initialCount - 1, newCount, "Sale count should decrease by 1");
+        if (initialCount == 1) {
+            // Wait for the table to be empty
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//table//tbody/tr")));
+            // After deleting the last element, the table should be empty
+            int newCount = 0;
+            try {
+                newCount = salesPage.getSaleCount();
+            } catch (Exception e) {
+                newCount = 0; // Table is empty
+            }
+            assertEquals(0, newCount, "Sale count should be 0 after deleting the last element");
+        } else {
+            wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
+            int newCount = salesPage.getSaleCount();
+            assertEquals(initialCount - 1, newCount, "Sale count should decrease by 1");
+        }
     }
 
     @Test
@@ -249,11 +261,21 @@ public class SaleManagementTest extends BaseSeleniumTest {
         wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton)).click();
 
         // Wait for the table to update after deletion
-        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
-
-        // Verify the rows are deleted (assuming sale count decreases by 2)
-        int newCount = salesPage.getSaleCount();
-        assertEquals(initialCount - 2, newCount, "Sale count should decrease by 2 after multiple delete");
+        if (initialCount <= 2) {
+            // Wait for the table to be empty
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//table//tbody/tr")));
+            int newCount = 0;
+            try {
+                newCount = salesPage.getSaleCount();
+            } catch (Exception e) {
+                newCount = 0; // Table is empty
+            }
+            assertEquals(0, newCount, "Sale count should be 0 after deleting all elements");
+        } else {
+            wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
+            int newCount = salesPage.getSaleCount();
+            assertEquals(initialCount - 2, newCount, "Sale count should decrease by 2 after multiple delete");
+        }
     }
 
 }

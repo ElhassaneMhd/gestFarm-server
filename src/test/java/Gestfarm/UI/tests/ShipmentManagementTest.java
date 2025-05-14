@@ -63,8 +63,13 @@ public class ShipmentManagementTest extends BaseSeleniumTest {
         String address = "Test Address";
         String shippingDate = "01-01-2025";
 
-        // Get initial count of shipments
-        int initialCount = shipmentPage.getShipmentCount();
+        // Get initial count of shipments, handle empty table gracefully
+        int initialCount = 0;
+        try {
+            initialCount = shipmentPage.getShipmentCount();
+        } catch (Exception e) {
+            initialCount = 0; // Table is empty
+        }
 
         // Add a new shipment
         shipmentPage.clickAddShipment();

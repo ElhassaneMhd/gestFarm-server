@@ -50,13 +50,18 @@ public class SheepManagementTest extends BaseSeleniumTest {
     @DisplayName("Test adding a new sheep")
     public void testAddSheep() {
         int age = 2;
-        int number = rand.nextInt(1000); // Example number
-        int weight = 80; // Example weight in kg
-        String category = "Category A"; // Example category
-        String status = "Listed"; // Example status
+        int number = rand.nextInt(1000); 
+        int weight = 80; 
+        String category = "Category A"; 
+        String status = "Listed"; 
 
         // Get initial count of sheep
-        int initialCount = sheepPage.getSheepCount();
+        int initialCount = 0;
+        try {
+            initialCount = sheepPage.getSheepCount();
+        } catch (Exception e) {
+            initialCount = 0; 
+        }
 
         // Add a new sheep
         sheepPage.clickAddSheep();
@@ -119,7 +124,7 @@ public class SheepManagementTest extends BaseSeleniumTest {
     @DisplayName("Test searching for a sheep by number")
     public void testSearchSheep() {
         // Example sheep number to search for
-        int sheepNumber = 832;
+        int sheepNumber = 621;
 
         // Enter the sheep number in the search input
         By searchInput = By.xpath("//div[@id='root']/div[3]/div/div/div/section/div/div/div[1]/div[1]/div/div//input[@type='search']");

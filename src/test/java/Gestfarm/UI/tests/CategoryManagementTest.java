@@ -52,8 +52,13 @@ public class CategoryManagementTest extends BaseSeleniumTest {
         String uniqueCategoryName = "Test Category " + UUID.randomUUID().toString().substring(0, 8);
         String description = "Test description for automated testing";
 
-        // Get initial count of categories
-        int initialCount = categoriesPage.getCategoryCount();
+        // Get initial count of categories, handle empty table gracefully
+        int initialCount = 0;
+        try {
+            initialCount = categoriesPage.getCategoryCount();
+        } catch (Exception e) {
+            initialCount = 0; // Table is empty
+        }
 
         // Add a new category
         categoriesPage.clickAddCategory();
@@ -107,11 +112,22 @@ public class CategoryManagementTest extends BaseSeleniumTest {
         wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton)).click();
 
         // Wait for the table to update after deletion
-        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
-
-        // Verify the category count decreased by 1
-        int newCount = categoriesPage.getCategoryCount();
-        assertEquals(initialCount - 1, newCount, "Category count should decrease by 1 after deletion");
+        if (initialCount == 1) {
+            // Wait for the table to be empty
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//table//tbody/tr")));
+            // After deleting the last element, the table should be empty
+            int countAfterDelete = 0;
+            try {
+                countAfterDelete = categoriesPage.getCategoryCount();
+            } catch (Exception e) {
+                countAfterDelete = 0; // Table is empty
+            }
+            assertEquals(0, countAfterDelete, "Category count should be 0 after deleting the last element");
+        } else {
+            wait.until(ExpectedConditions.numberOfElementsToBeLessThan(By.xpath("//table//tbody/tr"), initialCount));
+            int countAfterDelete = categoriesPage.getCategoryCount();
+            assertEquals(initialCount - 1, countAfterDelete, "Category count should decrease by 1 after deletion");
+        }
     }
 
     @Test
