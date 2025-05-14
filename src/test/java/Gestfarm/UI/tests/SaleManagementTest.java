@@ -65,8 +65,13 @@ public class SaleManagementTest extends BaseSeleniumTest {
         int amount = 1000;
         int price = 5000;
 
-        // Get initial count of sales
-        int initialCount = salesPage.getSaleCount();
+        // Get initial count of sales, handle empty table gracefully
+        int initialCount;
+        try {
+            initialCount = salesPage.getSaleCount();
+        } catch (Exception e) {
+            initialCount = 0;
+        }
 
         // Add a new sale using the form structure
         salesPage.clickAddSale();
